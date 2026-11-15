@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}النسخ الاحتياطية{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div
+
+class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-cloud-arrow-up-fill me-2"></i>
+                        النسخ الاحتياطية
+                    </h5>
+                    <a href="/backup" class="btn btn-success btn-sm">
+                        <i class="bi bi-plus-circle-fill me-2"></i>
+                        إنشاء نسخة احتياطية جديدة
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>ملاحظة:</strong> يتم حفظ النسخ الاحتياطية تلقائيًا في مجلد <code>backups/</code>
+                </div>
+                
+                {% if backups %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>اسم الملف</th>
+                                <th>الحجم</th>
+                                <th>تاريخ الإنشاء</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for backup in backups %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td><code>{{ backup.name }}</code></td>
+                                <td><span class="badge bg-secondary">{{ backup.size }}</span></td>
+                                <td>{{ backup.time }}</td>
+                                <td>
+                                    <a href="/backup/download/{{ backup.name }}" class="btn btn-sm btn-primary me-2" title="تحميل">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                    <a href="/backup/restore/{{ backup.name }}" 
+                                       class="btn btn-sm btn-warning" 
+                                       title="استعادة"
+                                       onclick="return confirm('هل أنت متأكد من استعادة هذه النسخة الاحتياطية؟ سيتم استبدال البيانات الحالية!')">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+                    <p class="text-muted">لا توجد نسخ احتياطية حتى الآن</p>
+                    <a href="/backup" class="btn btn-success">
+                        <i class="bi bi-plus-circle-fill me-1"></i>
+                        إنشاء نسخة احتياطية
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

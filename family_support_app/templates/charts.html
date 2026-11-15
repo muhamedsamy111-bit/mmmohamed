@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}الرسوم البيانية{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-bar-chart-fill me-2"></i>
+                    الرسوم البيانية والإحصائيات
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    هذه الصفحة تعرض إحصائيات مرئية عن الأسر المسجلة في النظام
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- مخطط دائري - المؤهلين vs غير المؤهلين -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header text-center">
+                <h6 class="mb-0">نسبة الأسر المؤهلة للدعم</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="eligibleChart" width="400" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- مخطط شريطي - عدد الأطفال -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header text-center">
+                <h6 class="mb-0">توزيع الأسر حسب عدد الأطفال</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="childrenChart" width="400" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- مخطط شريطي - المحافظات -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header text-center">
+                <h6 class="mb-0">عدد الأسر في كل محافظة</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="governoratesChart" width="800" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+    // جلب البيانات من API
+    fetch('/api/stats')
+        .then(response => response.json())
+        .then(data => {
+            // 1. مخطط دائري - المؤهلين
+            const eligibleCtx = document.getElementById('eligibleChart').getContext('2d');
+            new Chart(eligibleCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['مؤهلة', 'غير مؤهلة'],
+                    datasets: [{
+                        data: [data.eligible, data.not_eligible],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(239, 68, 68, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(239, 68, 68, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: `الإجمالي: ${data.total} أسرة`
+                        }
+                    }
+                }
+            });
+
+            // 2. مخطط شريطي - عدد الأطفال
+            const childrenCtx = document.getElementById('childrenChart').getContext('2d');
+            new Chart(childrenCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(data.children_stats),
+                    datasets: [{
+                        label: 'عدد الأسر',
+                        data: Object.values(data.children_stats),
+                        backgroundColor: 'rgba(67, 97, 238, 0.7)',
+                        borderColor: 'rgba(67, 97, 238, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // 3. مخطط شريطي - المحافظات
+            const governoratesCtx = document.getElementById('governoratesChart').getContext('2d');
+            const governoratesData = Object.entries(data.governorates)
+                .sort((a, b) => b[1] - a[1]) // ترتيب تنازلي
+                .slice(0, 15); // أول 15 محافظة
+            
+            new Chart(governoratesCtx, {
+                type: 'bar',
+                data: {
+                    labels: governoratesData.map(item => item[0]),
+                    datasets: [{
+                        label: 'عدد الأسر',
+                        data: governoratesData.map(item => item[1]),
+                        backgroundColor: 'rgba(102, 126, 234, 0.7)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    indexAxis: 'y',
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            console.error('خطأ في جلب البيانات:', error);
+        });
+</script>
+{% endblock %}

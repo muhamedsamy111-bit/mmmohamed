@@ -1,0 +1,65 @@
+{% extends layout %}
+{% block title %}إحصائيات صحية{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="mb-3">
+    <h3 class="fw-bold"><i class="bi bi-heart-pulse me-2"></i>إحصائيات صحية</h3>
+    <p class="text-muted mb-0">محسوبة من الأسر اللي لها بيانات صحية مسجلة ({{ tot.with_data }} من {{ tot.families }}). "تحتاج متابعة" = حامل بدون متابعة أو تطعيمات ناقصة أو سوء تغذية أو متأخر عن موعد المتابعة.</p>
+  </div>
+
+  <div class="row g-3 mb-4 text-center">
+    <div class="col-6 col-md-3"><div class="card"><div class="card-body"><div class="fs-3 fw-bold text-danger">{{ tot.preg_unmon }}</div><div class="small text-muted">حوامل بدون متابعة (من {{ tot.pregnant }} حامل)</div></div></div></div>
+    <div class="col-6 col-md-3"><div class="card"><div class="card-body"><div class="fs-3 fw-bold text-success">{{ vacc_pct if vacc_pct is not none else '—' }}{% if vacc_pct is not none %}%{% endif %}</div><div class="small text-muted">اكتمال التطعيمات (أسر لديها أطفال تحت 5)</div></div></div></div>
+    <div class="col-6 col-md-3"><div class="card"><div class="card-body"><div class="fs-3 fw-bold text-danger">{{ tot.malnut }}</div><div class="small text-muted">أسر بعلامات سوء تغذية</div></div></div></div>
+    <div class="col-6 col-md-3"><div class="card"><div class="card-body"><div class="fs-3 fw-bold text-primary">{{ need_pct if need_pct is not none else '—' }}{% if need_pct is not none %}%{% endif %}</div><div class="small text-muted">أسر تحتاج متابعة صحية ({{ tot.need }})</div></div></div></div>
+  </div>
+
+  <div class="row g-3 mb-4 text-center">
+    <div class="col-6 col-md-3"><div class="card"><div class="card-body"><div class="fs-3 fw-bold text-warning">{{ tot.overdue }}</div><div class="small text-muted">متأخرين عن موعد المتابعة</div></div></div></div>
+    <div class="col-6 col-md-3"><div class="card"><div class="card-body"><div class="fs-3 fw-bold text-dark">{{ tot.burden }}</div><div class="small text-muted">أسر تكلفة علاجها ≥ {{ cfg.catastrophic_threshold_pct }}% من الدخل</div></div></div></div>
+    <div class="col-12 col-md-6"><div class="card h-100"><div class="card-body small text-muted text-start">
+      <div>مصدر حدود النسب: <strong>{{ cfg.threshold_source or 'غير محدد — اكتبه في data/health_schedule.json' }}</strong></div>
+      <div>مصدر جدول المتابعة: <strong>{{ cfg.schedule_source or 'غير محدد — اكتبه في data/health_schedule.json' }}</strong></div>
+    </div></div></div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header">نسبة الأسر المحتاجة لمتابعة صحية لكل محافظة (%)</div>
+    <div class="card-body"><div style="height:340px"><canvas id="needChart"></canvas></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">التفصيل حسب المحافظة</div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light"><tr><th>المحافظة</th><th>أسر بها بيانات</th><th>حوامل بدون متابعة</th><th>اكتمال التطعيمات</th><th>سوء تغذية</th><th>مرض مزمن</th><th>متأخرين</th><th>عبء علاج</th><th>تحتاج متابعة</th></tr></thead>
+        <tbody>
+        {% for r in rows %}
+          <tr>
+            <td class="fw-bold">{{ r.gov }}</td><td>{{ r.n }}</td><td>{{ r.preg_unmon }}</td>
+            <td>{% if r.vacc_pct is not none %}{{ r.vacc_pct }}%{% else %}—{% endif %}</td>
+            <td>{{ r.malnut }}</td><td>{{ r.chronic }}</td><td>{{ r.overdue }}</td><td>{{ r.burden }}</td>
+            <td><div class="progress" style="height:14px"><div class="progress-bar bg-danger" style="width:{{ r.need_pct }}%">{{ r.need_pct }}%</div></div></td>
+          </tr>
+        {% else %}
+          <tr><td colspan="9" class="text-center text-muted py-4">لا توجد بيانات صحية مسجلة بعد.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const chartData = {{ chart_data|safe }};
+if (chartData.labels.length) {
+  new Chart(document.getElementById('needChart'), {
+    type: 'bar',
+    data: { labels: chartData.labels, datasets: [{ label: 'نسبة الأسر المحتاجة لمتابعة (%)', data: chartData.values, backgroundColor: '#dc3545' }] },
+    options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+  });
+}
+</script>
+{% endblock %}

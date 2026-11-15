@@ -1,0 +1,79 @@
+{% extends "base_public.html" %}
+
+{% block title %}تسجيل مولود جديد{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h5 class="section-title"><i class="bi bi-emoji-smile me-2"></i>تسجيل مولود جديد</h5>
+            <p class="text-muted small mb-4">
+                يتم تسجيل بيانات كل مولود من واقع المستشفى. لو الأسرة عندها توأم (أكتر من مولود بنفس تاريخ الميلاد
+                لنفس الأم)، هيتم إرسال رسالة نصية تلقائيًا لرقم الأسرة تفيدهم بأهليتهم لدعم التوائم.
+            </p>
+
+            {% if result_message %}
+            <div class="alert alert-info">{{ result_message }}</div>
+            {% endif %}
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form method="POST" action="/register-birth">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">اسم الأم / رب الأسرة</label>
+                                <input type="text" name="mother_name" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">الرقم القومي للأم</label>
+                                <input type="text" name="mother_national_id" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">رقم هاتف الأسرة</label>
+                                <input type="tel" name="phone" class="form-control" placeholder="مثال: +201xxxxxxxxx" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">المحافظة</label>
+                                <input type="text" name="governorate" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">اسم المستشفى</label>
+                                <input type="text" name="hospital" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">تاريخ الميلاد</label>
+                                <input type="date" name="birth_date" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">اسم المولود</label>
+                                <input type="text" name="baby_name" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">النوع</label>
+                                <select name="gender" class="form-select" required>
+                                    <option value="ذكر">ذكر</option>
+                                    <option value="أنثى">أنثى</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning small mt-4">
+                            <i class="bi bi-info-circle me-1"></i>
+                            في حالة التوأم: سجّل كل مولود على حدة بنفس الرقم القومي للأم ونفس تاريخ الميلاد،
+                            وهيتم كشف الحالة تلقائيًا عند تسجيل المولود الثاني.
+                        </div>
+
+                        <button type="submit" class="btn btn-lg w-100 mt-2" style="background:var(--gov-blue);color:#fff">
+                            <i class="bi bi-save me-2"></i>تسجيل المولود
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-3">
+                <a href="/births" class="small text-decoration-none"><i class="bi bi-list-ul me-1"></i>عرض كل المواليد المسجّلة</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

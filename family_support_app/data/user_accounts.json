@@ -1,0 +1,19 @@
+{
+  "محمود77": {
+    "password": "scrypt:32768:8:1$klPOIWPlw7eTRKBb$47d9afe65b361c9c1e970a521243b27ac2b16bb1bd8295ba65675947d8becd0e8dd9ce7357d08828b47e32318d4f62036083364305c8c2c2a97d0d64f26289cd",
+    "role": "user",
+    "name": "محمود"
+  },
+  "marasss": {
+    "password": "$2a$10$3T6LBNGBYgVWGR0661CVLOAdLpJuDOxZib3.GOVkcamLgX3MpUP86",
+    "role": "user",
+    "name": "Maraiam Elhadedy",
+    "governorate": ""
+  },
+  "abdo22": {
+    "password": "$2a$10$k0t0reIkMWphCf2IQSxPvulTuyrhDnzB36KNkk6Ve46yW9sJu3mVq",
+    "role": "user",
+    "name": "abdo",
+    "governorate": ""
+  }
+}

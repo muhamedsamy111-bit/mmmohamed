@@ -1,0 +1,64 @@
+{% extends "base_public.html" %}
+
+{% block title %}حسابي{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h5 class="section-title"><i class="bi bi-person-circle me-2"></i>حسابي</h5>
+            <p class="text-muted small mb-4">أهلاً {{ current_user.name }}، من هنا تقدر تقدّم على طلب دعم أو تتابع حالة طلباتك السابقة.</p>
+
+            <div class="row g-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm text-center p-4 community-account-card">
+                        <i class="bi bi-people-fill" style="font-size:44px;color:var(--gov-blue)"></i>
+                        <h6 class="fw-bold mt-3">مجتمع توأمي</h6>
+                        <p class="text-muted small">تواصلي مع أسر أخرى، اطرحي أسئلتك وشاركي خبراتك في الحمل والتربية ورعاية الأطفال.</p>
+                        <a href="/community" class="btn btn-primary align-self-center mt-2">ادخلي المجتمع</a>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm text-center p-4 toy-account-card">
+                        <i class="bi bi-shop" style="font-size:44px;color:var(--gov-blue)"></i>
+                        <h6 class="fw-bold mt-3">متجر ألعاب الأطفال</h6>
+                        <p class="text-muted small">اشتري الألعاب أو استأجريها للمدة التي تناسب أسرتك، وتابعي حالة طلباتك.</p>
+                        <div class="d-flex justify-content-center gap-2 flex-wrap"><a href="/shop" class="btn btn-primary mt-2">تصفحي المتجر</a><a href="/shop/orders" class="btn btn-outline-primary mt-2">طلباتي</a></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100 text-center p-4">
+                        <i class="bi bi-file-earmark-plus" style="font-size:44px;color:var(--gov-blue)"></i>
+                        <h6 class="fw-bold mt-3">تقديم على طلب الحصول على الدعم</h6>
+                        <p class="text-muted small">سجّل بيانات أسرتك عشان يتم تقييم استحقاقك للدعم</p>
+                        <a href="/register-family" class="btn mt-2" style="background:var(--gov-blue);color:#fff">تقديم طلب جديد</a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100 text-center p-4">
+                        <i class="bi bi-clipboard-check" style="font-size:44px;color:var(--gov-gold)"></i>
+                        <h6 class="fw-bold mt-3">عرض الدعم المقبول</h6>
+                        <p class="text-muted small">
+                            {% if requests_count > 0 %}
+                                عندك {{ requests_count }} طلب مسجل باسمك
+                            {% else %}
+                                لسه معملتش أي طلب دعم
+                            {% endif %}
+                        </p>
+                        <a href="/my-support" class="btn mt-2" style="background:var(--gov-gold);color:#003b6f">عرض حالة طلباتي</a>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm text-center p-4">
+                        <i class="bi bi-file-earmark-medical" style="font-size:44px;color:#198754"></i>
+                        <h6 class="fw-bold mt-3">صور تحاليل الفيتامينات والمعادن</h6>
+                        <p class="text-muted small mb-1">ارفع صور تحاليلك علشان تتخزن كنسخة احتياطية ويرجعلها الأخصائي لو احتاج، ولو ضاعت منك تلاقيها هنا.</p>
+                        {% if has_requests and labs_missing %}<div class="small text-danger fw-bold mb-2"><i class="bi bi-exclamation-circle me-1"></i>مطلوب منك رفع صور التحاليل</div>{% endif %}
+                        <a href="/my-labs" class="btn mt-2 btn-success">رفع / عرض التحاليل</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

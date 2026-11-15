@@ -1,0 +1,75 @@
+{% extends layout %}
+{% block title %}مخطط القوافل الطبية{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="mb-3">
+    <h3 class="fw-bold"><i class="bi bi-truck me-2"></i>مخطط القوافل الطبية</h3>
+    <p class="text-muted mb-0">بيرتّب المحافظات حسب عدد الأسر المحتاجة لمتابعة صحية، ويطلّع قائمة الأسر اللي تتكشف عليها القافلة بترتيب الأولوية الإجمالية. هو اقتراح للقرار، والقرار للمسؤول.</p>
+  </div>
+
+  <form method="GET" class="row g-2 mb-3">
+    <div class="col-md-3">
+      <label class="form-label small">ترتيب المحافظات حسب</label>
+      <select name="by" class="form-select" onchange="this.form.submit()">
+        <option value="count" {% if by == 'count' %}selected{% endif %}>عدد الأسر المحتاجة</option>
+        <option value="pct" {% if by == 'pct' %}selected{% endif %}>النسبة المئوية</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label small">سعة القافلة (عدد الأسر)</label>
+      <input type="number" name="capacity" value="{{ capacity }}" min="10" max="2000" class="form-control">
+    </div>
+    <input type="hidden" name="gov" value="{{ gov }}">
+    <div class="col-md-2 d-grid align-items-end"><button class="btn btn-primary mt-auto" type="submit">تحديث</button></div>
+  </form>
+
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header">المحافظات (اضغط لاختيار وجهة القافلة)</div>
+        <div class="list-group list-group-flush" style="max-height:560px;overflow-y:auto">
+          {% for d in govs %}
+          <a class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if d.gov == gov %}active{% endif %}"
+             href="{{ url_for('health_caravans', gov=d.gov, by=by, capacity=capacity) }}">
+            <span>{{ loop.index }}. {{ d.gov }}</span>
+            <span><span class="badge bg-danger">{{ d.need }}</span> <small>{{ d.pct }}%</small></span>
+          </a>
+          {% else %}<div class="p-3 text-muted">لا توجد بيانات صحية مسجلة.</div>{% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <span>قائمة القافلة: <strong>{{ gov or '—' }}</strong> — {{ selected|length }} من {{ need_total }} أسرة محتاجة</span>
+          {% if gov %}
+          <span class="d-flex gap-2">
+            <a class="btn btn-sm btn-outline-success" href="{{ url_for('health_caravans_export', gov=gov, capacity=capacity) }}"><i class="bi bi-filetype-csv me-1"></i>تصدير CSV</a>
+            <button class="btn btn-sm btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer me-1"></i>طباعة</button>
+          </span>
+          {% endif %}
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle mb-0">
+            <thead class="table-light"><tr><th>#</th><th>رب الأسرة</th><th>التنبيهات</th><th>الإجمالية</th><th class="d-print-none">إحالة</th></tr></thead>
+            <tbody>
+            {% for it in selected %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ it.row['اسم رب الأسرة'] }}</td>
+                <td>{% for a in it.alerts %}<span class="badge bg-{{ alert_badge[a] }} me-1">{{ alert_types[a] }}</span>{% endfor %}</td>
+                <td><strong>{{ it.total }}</strong></td>
+                <td class="d-print-none"><a class="btn btn-sm btn-outline-primary" target="_blank" href="{{ url_for('health_referral', index=it.idx) }}"><i class="bi bi-file-earmark-text"></i></a></td>
+              </tr>
+            {% else %}
+              <tr><td colspan="5" class="text-center text-muted py-4">اختر محافظة من القائمة.</td></tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

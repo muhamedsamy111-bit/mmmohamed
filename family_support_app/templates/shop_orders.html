@@ -1,0 +1,15 @@
+{% extends layout %}
+{% block title %}طلباتي من المتجر{% endblock %}
+{% block content %}
+<div class="container py-4 shop-page">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4"><div><h1 class="h3 fw-bold">{% if is_admin %}طلبات المتجر والإيجارات{% else %}طلباتي{% endif %}</h1><p class="text-muted mb-0">تابعي تجهيز المشتريات ومواعيد إعادة الألعاب المستأجرة.</p></div><a class="btn btn-primary" href="/shop"><i class="bi bi-shop me-1"></i>العودة للمتجر</a></div>
+  {% for order in orders %}
+  <article class="card border-0 shadow-sm mb-4"><div class="card-header d-flex justify-content-between flex-wrap gap-2"><strong>طلب رقم {{ order.id }} · {{ order.created_at }}</strong><span class="badge text-bg-primary">{{ order.order_status }}</span></div><div class="card-body">
+    {% if is_admin %}<div class="small text-muted mb-2">{{ order.customer_name }} · {{ order.phone }} · {{ order.address }}</div>{% endif %}
+    <div class="table-responsive"><table class="table table-sm align-middle"><thead><tr><th>اللعبة</th><th>النوع</th><th>الكمية</th><th>القيمة</th><th>الإيجار / الحالة</th></tr></thead><tbody>
+      {% for item in order.items %}<tr><td>{{ item.product_name }}</td><td>{{ item.item_kind }}</td><td>{{ item.quantity }}</td><td>{{ (item.unit_price * item.quantity)|round(2) }} ج.م</td><td>{% if item.item_kind == 'إيجار' %}<span class="d-block">حتى {{ item.rental_due_date }} · {{ item.rental_status }}</span>{% if is_admin or current_user.role == 'employee' %}<form method="POST" action="/admin/shop/rentals/{{ item.id }}/status" class="d-flex gap-2 mt-2"><select name="status" class="form-select form-select-sm"><option {% if item.rental_status == 'بانتظار التسليم' %}selected{% endif %}>بانتظار التسليم</option><option {% if item.rental_status == 'تم التسليم' %}selected{% endif %}>تم التسليم</option><option {% if item.rental_status == 'تم الإرجاع' %}selected{% endif %}>تم الإرجاع</option><option {% if item.rental_status == 'متأخر' %}selected{% endif %}>متأخر</option></select><button class="btn btn-sm btn-outline-primary" type="submit">تحديث</button></form>{% endif %}{% else %}—{% endif %}</td></tr>{% endfor %}
+    </tbody></table></div><div class="text-end fw-bold">الإجمالي: {{ order.total|round(2) }} جنيه · {{ order.payment_method }}</div>
+  </div></article>
+  {% else %}<div class="alert alert-light text-center py-5">لا توجد طلبات حتى الآن. <a href="/shop">تصفحي المتجر</a>.</div>{% endfor %}
+</div>
+{% endblock %}

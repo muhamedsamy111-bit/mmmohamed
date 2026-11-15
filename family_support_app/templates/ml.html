@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block title %}نموذج التنبؤ بالذكاء الاصطناعي{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="text-center mb-4">
+    <h2 class="fw-bold text-dark"><i class="bi bi-cpu me-2"></i>نموذج التنبؤ - {{ model_info.model_name }}</h2>
+    <p class="text-muted">نموذج ذكاء اصطناعي يتنبأ بأهلية الأسر للدعم، مُدرَّب ومُختبَر ببيانات منفصلة</p>
+  </div>
+
+  <!-- Model Info Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card text-center p-3">
+        <div class="fs-1 fw-bold {% if model_info.trained %}text-success{% else %}text-danger{% endif %}">
+          {% if model_info.trained %}✓{% else %}✗{% endif %}
+        </div>
+        <div class="text-muted small">حالة النموذج</div>
+        <div class="fw-bold">{% if model_info.trained %}مُدرَّب{% else %}غير مُدرَّب{% endif %}</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center p-3">
+        <div class="fs-1 fw-bold text-primary">{{ model_info.total_samples }}</div>
+        <div class="text-muted small">إجمالي البيانات</div>
+        <div class="fw-bold">{{ model_info.train_size }} تدريب / {{ model_info.test_size }} اختبار</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center p-3">
+        <div class="fs-1 fw-bold text-secondary">
+          {% if model_info.train_accuracy is not none %}{{ model_info.train_accuracy }}%{% else %}—{% endif %}
+        </div>
+        <div class="text-muted small">دقة التدريب</div>
+        <div class="fw-bold">Train Accuracy</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center p-3 border-warning">
+        <div class="fs-1 fw-bold text-warning">
+          {% if model_info.test_accuracy is not none %}{{ model_info.test_accuracy }}%{% else %}—{% endif %}
+        </div>
+        <div class="text-muted small">دقة الاختبار (الرقم الحقيقي)</div>
+        <div class="fw-bold">Test Accuracy</div>
+      </div>
+    </div>
+  </div>
+
+  {% if model_info.error %}
+  <div class="alert alert-danger rounded-3 mb-4">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <strong>خطأ:</strong> {{ model_info.error }}
+    {% if 'scikit' in model_info.error %}
+    <div class="mt-2"><code>pip install scikit-learn</code></div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if model_info.warning %}
+  <div class="alert alert-warning rounded-3 mb-4">
+    <i class="bi bi-info-circle me-2"></i>
+    {{ model_info.warning }}
+  </div>
+  {% endif %}
+
+  {% if model_info.trained %}
+  <div class="row g-3 mb-4">
+
+    <!-- Feature Importance -->
+    <div class="col-md-5">
+      <div class="card h-100">
+        <div class="card-header"><i class="bi bi-bar-chart me-2"></i>أهمية المتغيرات (Feature Importance)</div>
+        <div class="card-body">
+          {% for fi in model_info.feature_importance | sort(attribute='importance', reverse=True) %}
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="fw-semibold">{{ fi.feature }}</span>
+              <span class="text-primary fw-bold">{{ fi.importance }}%</span>
+            </div>
+            <div class="progress" style="height: 10px; border-radius: 10px;">
+              <div class="progress-bar bg-primary" style="width: {{ fi.importance }}%; border-radius: 10px;"></div>
+            </div>
+          </div>
+          {% endfor %}
+
+          <div class="alert alert-info small mt-3 mb-0 rounded-3">
+            <i class="bi bi-info-circle me-1"></i>
+            النسبة توضح مدى تأثير كل متغير على قرار النموذج
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div class="col-md-7">
+      <div class="card h-100">
+        <div class="card-header"><i class="bi bi-diagram-3 me-2"></i>ليه دقة التدريب والاختبار مختلفين؟</div>
+        <div class="card-body">
+          <div class="row g-2 text-center mb-3">
+            <div class="col-3">
+              <div class="bg-primary bg-opacity-10 rounded-3 p-2">
+                <i class="bi bi-database fs-3 text-primary d-block mb-1"></i>
+                <small>{{ model_info.train_size }} أسرة للتدريب</small>
+              </div>
+            </div>
+            <div class="col-1 d-flex align-items-center justify-content-center">
+              <i class="bi bi-arrow-left text-muted"></i>
+            </div>
+            <div class="col-3">
+              <div class="bg-warning bg-opacity-10 rounded-3 p-2">
+                <i class="bi bi-tree fs-3 text-warning d-block mb-1"></i>
+                <small>Random Forest</small>
+              </div>
+            </div>
+            <div class="col-1 d-flex align-items-center justify-content-center">
+              <i class="bi bi-arrow-left text-muted"></i>
+            </div>
+            <div class="col-3">
+              <div class="bg-success bg-opacity-10 rounded-3 p-2">
+                <i class="bi bi-check-circle fs-3 text-success d-block mb-1"></i>
+                <small>{{ model_info.test_size }} أسرة اختبار</small>
+              </div>
+            </div>
+          </div>
+
+          <p class="small text-muted">
+            النموذج بيتدرب على جزء من الأسر بس (Train)، وبعدين بيتم اختباره على أسر
+            <strong>ما شافهاش خالص وقت التدريب</strong> (Test) — ده اللي بيدي رقم دقة صادق:
+          </p>
+          <ul class="small text-muted">
+            <li><strong>دقة التدريب</strong>: مدى حفظ النموذج للبيانات اللي اتدرب عليها (ممكن تكون عالية جدًا وده طبيعي)</li>
+            <li><strong>دقة الاختبار</strong>: الرقم اللي تعتمد عليه فعليًا، لأنه بيقيس قدرة النموذج يعمم على بيانات جديدة</li>
+          </ul>
+          <div class="alert alert-success small rounded-3 mb-0">
+            <i class="bi bi-trophy me-1"></i>
+            دقة الاختبار الحقيقية: <strong>{{ model_info.test_accuracy }}%</strong> —
+            {% if model_info.test_accuracy >= 80 %}ممتاز 🎉
+            {% elif model_info.test_accuracy >= 60 %}جيد، يحتاج بيانات أكتر
+            {% else %}يحتاج تحسين، زود البيانات{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Predictions Table -->
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span><i class="bi bi-table me-2"></i>نتائج التنبؤ على عينة الاختبار (بيانات لم يرها الموديل أثناء التدريب)</span>
+      <div>
+        <span class="badge bg-success me-1">
+          {{ predictions | selectattr('match') | list | length }} صحيح
+        </span>
+        <span class="badge bg-danger">
+          {{ predictions | rejectattr('match') | list | length }} خطأ
+        </span>
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>اسم الأسرة</th>
+              <th>الأولوية</th>
+              <th>القرار الفعلي</th>
+              <th>تنبؤ النموذج</th>
+              <th>نسبة الثقة</th>
+              <th>النتيجة</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in predictions %}
+            <tr>
+              <td class="fw-semibold">{{ p.name }}</td>
+              <td><small>{{ p.priority }}</small></td>
+              <td>
+                <span class="badge {% if p.actual == 'مؤهل' %}bg-success{% else %}bg-secondary{% endif %}">
+                  {{ p.actual }}
+                </span>
+              </td>
+              <td>
+                <span class="badge {% if p.predicted == 'مؤهل' %}bg-success bg-opacity-75{% else %}bg-secondary bg-opacity-75{% endif %}">
+                  {{ p.predicted }}
+                </span>
+              </td>
+              <td>
+                <div class="progress" style="height: 8px; width: 80px;">
+                  <div class="progress-bar {% if p.confidence >= 70 %}bg-success{% elif p.confidence >= 50 %}bg-warning{% else %}bg-danger{% endif %}"
+                       style="width: {{ p.confidence }}%"></div>
+                </div>
+                <small class="text-muted">{{ p.confidence }}%</small>
+              </td>
+              <td>
+                {% if p.match %}
+                  <i class="bi bi-check-circle text-success fs-5"></i>
+                {% else %}
+                  <i class="bi bi-x-circle text-danger fs-5"></i>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,246 @@
+{% extends "base_employee.html" if current_user.role == "employee" else "base.html" %}
+
+{% block title %}عرض جميع الأسر{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stats-card bg-danger text-white">
+            <div class="stats-number">{{ priority_stats['أولوية قصوى 🔴'] }}</div>
+            <div class="stats-label">أولوية قصوى 🔴</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card bg-warning text-white">
+            <div class="stats-number">{{ priority_stats['أولوية متوسطة 🟡'] }}</div>
+            <div class="stats-label">أولوية متوسطة 🟡</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card bg-success text-white">
+            <div class="stats-number">{{ priority_stats['أولوية منخفضة 🟢'] }}</div>
+            <div class="stats-label">أولوية منخفضة 🟢</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="stats-number">{{ families|length }}</div>
+            <div class="stats-label">إجمالي الأسر</div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <h5 class="mb-0">
+                <i class="bi bi-people-fill me-2"></i>
+                جميع الأسر المسجلة (نظام التقييم الاجتماعي)
+            </h5>
+            <div class="d-flex gap-2 mt-2 mt-md-0">
+                <a href="/charts" class="btn btn-sm btn-info" title="عرض الرسوم البيانية">
+                    <i class="bi bi-bar-chart-fill"></i> رسوم بيانية
+                </a>
+                <a href="/export/excel" class="btn btn-sm btn-success" title="تصدير لـ Excel">
+                    <i class="bi bi-file-earmark-excel-fill"></i> تصدير Excel
+                </a>
+                <a href="/export/monthly-report" class="btn btn-sm btn-outline-success" title="تقرير الشهر الحالي">
+                    <i class="bi bi-calendar3"></i> تقرير الشهر الحالي
+                </a>
+                {% if current_user.role == 'admin' %}
+                <a href="/import" class="btn btn-sm btn-primary" title="استيراد بيانات">
+                    <i class="bi bi-upload"></i> استيراد
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- شريط البحث والفلترة -->
+        <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" id="searchInput" class="form-control" 
+                           placeholder="ابحث عن اسم رب الأسرة أو الرقم القومي أو المحافظة..."
+                           value="{{ search_query }}">
+                    <button class="btn btn-outline-secondary" type="button" id="clearSearch">
+                        <i class="bi bi-x-circle"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <select id="priorityFilter" class="form-select">
+                    <option value="">فلترة حسب مستوى الأولوية</option>
+                    {% for level in priority_levels %}
+                    <option value="{{ level }}" {% if filter_priority == level %}selected{% endif %}>{{ level }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>اسم رب الأسرة</th>
+                        <th>الرقم القومي</th>
+                        <th>المحافظة</th>
+                        <th>عدد الأطفال</th>
+                        <th>عدد أفراد الأسرة</th>
+                        <th>الدخل</th>
+                        <th>الأولوية</th>
+                        <th>الدعم</th>
+                        <th>حالة الطلب</th>
+                        <th>الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for family in families %}
+                    <tr class="{% if 'قصوى' in family['مستوى الأولوية'] or 'حرج' in family['مستوى الأولوية'] %}table-danger{% elif 'متوسطة' in family['مستوى الأولوية'] or 'عالي' in family['مستوى الأولوية'] %}table-warning{% else %}table-success{% endif %}">
+                        <td>{{ loop.index }}</td>
+                        <td><strong>{{ family['اسم رب الأسرة'] }}</strong></td>
+                        <td>{{ family['الرقم القومي'] }}</td>
+                        <td>
+                            <span class="badge bg-info">{{ family['المحافظة'] }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary">{{ family['عدد الأطفال'] }}</span>
+                        </td>
+                        <td>{{ family.get('عدد أفراد الأسرة', '') }}</td>
+                        <td>
+                           <a href="/followup/{{ loop.index0 }}" class="btn btn-sm btn-info me-1" title="متابعة">
+    <i class="bi bi-calendar-check-fill"></i>
+</a>
+                        </td>
+                        <td>
+                            {% if 'قصوى' in family['مستوى الأولوية'] or 'حرج' in family['مستوى الأولوية'] %}
+                                <span class="badge bg-danger">{{ family['مستوى الأولوية'] }}</span>
+                            {% elif 'متوسطة' in family['مستوى الأولوية'] or 'عالي' in family['مستوى الأولوية'] %}
+                                <span class="badge bg-warning text-dark">{{ family['مستوى الأولوية'] }}</span>
+                            {% else %}
+                                <span class="badge bg-success">{{ family['مستوى الأولوية'] }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if family['مؤهل للدعم'] == 'نعم' %}
+                                <span class="badge-eligible">
+                                    <i class="bi bi-check-circle-fill me-1"></i> مؤهل
+                                </span>
+                            {% else %}
+                                <span class="badge-not-eligible">
+                                    <i class="bi bi-x-circle-fill me-1"></i> غير مؤهل
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% set status = family.get('حالة الطلب', 'قيد المراجعة') or 'قيد المراجعة' %}
+                            {% if current_user.role in ['admin', 'employee'] %}
+                            <form method="POST" action="/families/{{ loop.index0 }}/set-status" class="d-inline">
+                                <select name="status" onchange="this.form.submit()"
+                                        class="form-select form-select-sm
+                                        {% if status == 'مقبول' %}bg-success text-white
+                                        {% elif status == 'مرفوض' %}bg-danger text-white
+                                        {% else %}bg-warning{% endif %}">
+                                    <option value="قيد المراجعة" {% if status == 'قيد المراجعة' %}selected{% endif %}>قيد المراجعة</option>
+                                    <option value="مقبول" {% if status == 'مقبول' %}selected{% endif %}>مقبول</option>
+                                    <option value="مرفوض" {% if status == 'مرفوض' %}selected{% endif %}>مرفوض</option>
+                                </select>
+                            </form>
+                            {% else %}
+                                {% if status == 'مقبول' %}
+                                    <span class="badge bg-success">{{ status }}</span>
+                                {% elif status == 'مرفوض' %}
+                                    <span class="badge bg-danger">{{ status }}</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">{{ status }}</span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="/notes/{{ loop.index0 }}" class="btn btn-sm btn-secondary me-1" title="ملاحظات">
+                                <i class="bi bi-chat-square-text-fill"></i>
+                            </a>
+                            {% if current_user.role in ['admin', 'employee'] %}
+                            <a href="{{ url_for('index') }}?edit={{ loop.index0 }}" class="btn btn-sm btn-warning me-1" title="تعديل">
+                                <i class="bi bi-pencil-fill"></i>
+                            </a>
+                            <a href="/delete/{{ loop.index0 }}" class="btn btn-sm btn-danger" 
+                               onclick="return confirm('هل أنت متأكد من حذف هذه الأسرة؟')" title="حذف">
+                                <i class="bi bi-trash-fill"></i>
+                            </a>
+                            {% endif %}
+                            {% if family['مؤهل للدعم'] == 'نعم' %}
+                            <a href="/certificate/{{ loop.index0 }}" class="btn btn-sm btn-success mt-1" title="شهادة دعم" target="_blank">
+                                <i class="bi bi-file-earmark-text-fill"></i>
+                            </a>
+                            {% endif %}
+                            {% if current_user.role in ['admin', 'employee'] %}
+                                {% set family_docs = documents_index.get(family['الرقم القومي'], []) %}
+                                {% if family_docs %}
+                                <div class="dropdown d-inline">
+                                    <button class="btn btn-sm btn-outline-dark mt-1 dropdown-toggle" type="button" data-bs-toggle="dropdown" title="المستندات">
+                                        <i class="bi bi-paperclip"></i> {{ family_docs|length }}
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        {% for doc in family_docs %}
+                                        <li><a class="dropdown-item" href="/documents/{{ family['الرقم القومي'] }}/{{ doc.filename }}" target="_blank">{{ doc.type }}</a></li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if not families %}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox fs-1 text-muted mb-3"></i>
+            <p class="text-muted">
+                {% if search_query or filter_priority %}
+                    لا توجد نتائج مطابقة
+                {% else %}
+                    لا توجد أسر مسجلة حتى الآن
+                {% endif %}
+            </p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">إضافة أسرة جديدة</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // البحث الفوري
+    document.getElementById('searchInput').addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+            window.location.href = '/families?search=' + encodeURIComponent(this.value) + 
+                                  '{% if filter_priority %}&priority={{ filter_priority }}{% endif %}';
+        }
+    });
+
+    // مسح البحث
+    document.getElementById('clearSearch').addEventListener('click', function() {
+        document.getElementById('searchInput').value = '';
+        window.location.href = '/families{% if filter_priority %}?priority={{ filter_priority }}{% endif %}';
+    });
+
+    // فلترة الأولوية
+    document.getElementById('priorityFilter').addEventListener('change', function() {
+        const priority = this.value;
+        const search = document.getElementById('searchInput').value;
+        if (priority) {
+            window.location.href = '/families?priority=' + encodeURIComponent(priority) + 
+                                  (search ? '&search=' + encodeURIComponent(search) : '');
+        } else {
+            window.location.href = '/families' + (search ? '?search=' + encodeURIComponent(search) : '');
+        }
+    });
+</script>
+{% endblock %}

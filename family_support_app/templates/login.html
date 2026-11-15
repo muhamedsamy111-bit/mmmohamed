@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}تسجيل الدخول{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="auth-split">
+            <div class="row g-0">
+                <div class="col-md-5 d-none d-md-block">
+                    <div class="auth-side h-100 d-flex align-items-end">
+                        <div class="p-4">
+                            <h5 class="fw-bold mb-2">🤱 توأمي — دعم الأم والتوائم</h5>
+                            <p class="small mb-0" style="opacity:.9">سجّلي دخولك لمتابعة أسرتك، تحاليلك، ومواعيد متابعة الحمل.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-7 bg-white">
+                    <div class="p-4 p-lg-5">
+                <div class="text-center mb-4">
+                    <i class="bi bi-person-circle fs-1 text-primary"></i>
+                    <h5 class="mt-3">نظام إدارة الأسر</h5>
+                </div>
+                
+                {% if error %}
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    {{ error }}
+                </div>
+                {% endif %}
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <i class="bi bi-{{ 'check-circle-fill' if category == 'success' else 'info-circle-fill' if category == 'info' else 'exclamation-triangle-fill' }}"></i>
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                {% endwith %}
+                
+                <form method="POST" action="/login">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">اسم المستخدم</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-person"></i>
+                            </span>
+                            <input type="text" class="form-control" id="username" name="username" required 
+                                   placeholder="أدخل اسم المستخدم">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="password" class="form-label">كلمة المرور</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input type="password" class="form-control" id="password" name="password" required 
+                                   placeholder="أدخل كلمة المرور">
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                            تسجيل الدخول
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="mt-4 text-center">
+                    <small class="text-muted">
+                        <p class="mb-2">حسابات تجريبية:</p>
+                        <p class="mb-1"><strong>مدير:</strong> admin / admin123</p>
+                        <p class="mb-1"><strong>موظف:</strong> employee / employee123</p>
+                        <p class="mb-0"><strong>مستخدم:</strong> user / user123</p>
+                    </small>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="/signup" class="text-decoration-none small">مفيش حساب؟ سجّل حساب جديد كمواطن</a>
+                </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

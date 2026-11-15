@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}سجل الأمان{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="text-center mb-4">
+    <h2 class="fw-bold text-dark"><i class="bi bi-shield-lock me-2"></i>لوحة الأمان</h2>
+    <p class="text-muted">مراقبة محاولات الدخول والأمان</p>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card text-center p-3">
+        <div class="fs-1 fw-bold text-danger">{{ blocked_ips | length }}</div>
+        <div class="text-muted small">أجهزة محجوبة الآن</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center p-3">
+        <div class="fs-1 fw-bold text-warning">{{ failed_attempts | length }}</div>
+        <div class="text-muted small">أجهزة بمحاولات فاشلة</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center p-3">
+        <div class="fs-1 fw-bold text-primary">{{ security_log | length }}</div>
+        <div class="text-muted small">إجمالي الأحداث المسجلة</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Blocked IPs -->
+  {% if blocked_ips %}
+  <div class="card mb-4">
+    <div class="card-header bg-danger text-white"><i class="bi bi-ban me-2"></i>الأجهزة المحجوبة</div>
+    <div class="card-body p-0">
+      <table class="table mb-0">
+        <thead><tr><th>الـ IP</th><th>وقت الحجب</th><th>إجراء</th></tr></thead>
+        <tbody>
+          {% for ip, time in blocked_ips.items() %}
+          <tr>
+            <td><code>{{ ip }}</code></td>
+            <td>{{ time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            <td>
+              <a href="/security/unblock/{{ ip }}" class="btn btn-sm btn-success">
+                <i class="bi bi-unlock me-1"></i>إلغاء الحجب
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Security Log -->
+  <div class="card">
+    <div class="card-header"><i class="bi bi-journal-text me-2"></i>سجل الأحداث الأمنية</div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr><th>الوقت</th><th>الحدث</th><th>المستخدم</th><th>الـ IP</th></tr>
+          </thead>
+          <tbody>
+            {% for log in security_log %}
+            <tr>
+              <td><small class="text-muted">{{ log.time }}</small></td>
+              <td>
+                <span class="badge {% if 'فاشلة' in log.event or 'حجب' in log.event %}bg-danger{% elif 'ناجح' in log.event %}bg-success{% else %}bg-info{% endif %}">
+                  {{ log.event }}
+                </span>
+              </td>
+              <td>{{ log.username }}</td>
+              <td><code>{{ log.ip }}</code></td>
+            </tr>
+            {% endfor %}
+            {% if not security_log %}
+            <tr><td colspan="4" class="text-center text-muted py-4">لا توجد أحداث مسجلة</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

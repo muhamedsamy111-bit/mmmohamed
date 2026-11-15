@@ -1,0 +1,27 @@
+{% extends layout %}
+{% block title %}صور التحاليل{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <h4 class="fw-bold mb-1"><i class="bi bi-file-earmark-medical me-2"></i>صور التحاليل — {{ family['اسم رب الأسرة'] }}</h4>
+  <p class="text-muted">{{ family['المحافظة'] }} — الصور محفوظة كنسخة احتياطية رفعتها الأسرة. النظام لا يفسّر النتائج، والتقييم للجهة الصحية المختصة.</p>
+  <div class="row g-3">
+    {% for e in labs %}
+    <div class="col-6 col-md-3">
+      <div class="card h-100">
+        <a href="{{ url_for('download_lab', nid=nid, fname=e.filename) }}" target="_blank">
+          <img src="{{ url_for('download_lab', nid=nid, fname=e.filename) }}" class="card-img-top" alt="تحليل" style="max-height:220px;object-fit:cover">
+        </a>
+        <div class="card-body p-2 small">
+          <span class="badge bg-secondary">{{ e.category }}</span>
+          <div class="text-muted">{{ e.uploaded_at }}</div>
+          {% if e.note %}<div>{{ e.note }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="col-12"><div class="alert alert-warning">لم ترفع الأسرة أي صور تحاليل بعد.</div></div>
+    {% endfor %}
+  </div>
+  <a href="javascript:history.back()" class="btn btn-outline-secondary mt-3">رجوع</a>
+</div>
+{% endblock %}

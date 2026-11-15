@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% block title %}الخريطة التفاعلية{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="text-center mb-4">
+    <h2 class="fw-bold text-dark"><i class="bi bi-map me-2"></i>الخريطة التفاعلية لتوزيع الأسر</h2>
+    <p class="text-muted">توزيع الأسر المسجلة على محافظات مصر</p>
+  </div>
+
+  <!-- المؤشرات القومية (CAPMAS) - أرقام لمصر كلها، مش لكل محافظة -->
+  <div class="card mb-3">
+    <div class="card-header d-flex align-items-center justify-content-between">
+      <span><i class="bi bi-bar-chart-line me-2"></i>المؤشرات القومية (مصدر: CAPMAS)</span>
+      <span class="badge bg-secondary">أرقام على مستوى مصر كلها، مش خاصة بمحافظة معينة</span>
+    </div>
+    <div class="card-body">
+      <div class="row g-3 text-center" id="nationalIndicators"></div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-9">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-geo-alt me-2"></i>خريطة مصر</span>
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-primary" id="modeCount">عدد الأسر</button>
+            <button type="button" class="btn btn-outline-danger" id="modeHealth"><i class="bi bi-heart-pulse me-1"></i>% متابعة صحية</button>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div id="map" style="height: 520px; border-radius: 0 0 15px 15px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3">
+      <div class="card h-100">
+        <div class="card-header"><i class="bi bi-list-ul me-2"></i>المحافظات</div>
+        <div class="card-body p-0" style="overflow-y: auto; max-height: 520px;">
+          <ul class="list-group list-group-flush" id="govList"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="card mt-3">
+    <div class="card-body py-2 d-flex align-items-center gap-4 flex-wrap" id="legendHealth" style="display:none !important">
+      <span class="fw-bold small">نسبة الأسر المحتاجة لمتابعة صحية:</span>
+      <span><span class="badge" style="background:#fee5d9;color:#333">أقل من 30%</span></span>
+      <span><span class="badge" style="background:#fcae91;color:#333">30-35%</span></span>
+      <span><span class="badge" style="background:#fb6a4a">35-40%</span></span>
+      <span><span class="badge" style="background:#cb181d">40%+</span></span>
+      <span><span class="badge" style="background:#ccc;color:#333">لا بيانات</span></span>
+    </div>
+    <div class="card-body py-2 d-flex align-items-center gap-4 flex-wrap" id="legendCount">
+      <span class="fw-bold small">مستوى الكثافة:</span>
+      <span><span class="badge" style="background:#fee5d9">1-2</span> منخفض</span>
+      <span><span class="badge" style="background:#fcae91;color:#333">3-5</span> متوسط</span>
+      <span><span class="badge" style="background:#fb6a4a">6-10</span> مرتفع</span>
+      <span><span class="badge" style="background:#cb181d">10+</span> عالي جداً</span>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const govData = {{ gov_data|safe }};
+const nationalIndicators = {{ national_indicators|safe }};
+
+// إحداثيات تقريبية لمحافظات مصر
+const govCoords = {
+  "القاهرة":      [30.0444, 31.2357],
+  "الجيزة":       [30.0131, 31.2089],
+  "الإسكندرية":   [31.2001, 29.9187],
+  "الدقهلية":     [31.0364, 31.3807],
+  "الشرقية":      [30.7322, 31.7195],
+  "المنوفية":     [30.5965, 30.9876],
+  "الغربية":      [30.8753, 31.0364],
+  "كفر الشيخ":    [31.1107, 30.9388],
+  "البحيرة":      [30.8480, 30.3436],
+  "الإسماعيلية":  [30.5965, 32.2715],
+  "بورسعيد":      [31.2565, 32.2841],
+  "السويس":       [29.9668, 32.5498],
+  "دمياط":        [31.4165, 31.8133],
+  "الفيوم":       [29.3084, 30.8428],
+  "بني سويف":     [29.0744, 31.0994],
+  "المنيا":       [28.1099, 30.7503],
+  "أسيوط":        [27.1783, 31.1859],
+  "سوهاج":        [26.5591, 31.6947],
+  "قنا":          [26.1651, 32.7160],
+  "الأقصر":       [25.6872, 32.6396],
+  "أسوان":        [24.0889, 32.8998],
+  "البحر الأحمر": [27.2579, 33.8116],
+  "الوادي الجديد":[25.4564, 29.1442],
+  "مطروح":        [31.3543, 27.2373],
+  "شمال سيناء":   [30.9232, 33.7751],
+  "جنوب سيناء":   [28.9133, 33.6069],
+};
+
+const map = L.map('map').setView([26.8206, 30.8025], 6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap'
+}).addTo(map);
+
+function getColor(total) {
+  return total > 10 ? '#cb181d' :
+         total > 5  ? '#fb6a4a' :
+         total > 2  ? '#fcae91' : '#fee5d9';
+}
+
+const govList = document.getElementById('govList');
+const allGovs = {...govData};
+const circles = {};
+
+function healthPct(info) {
+  return info.health_n ? Math.round((info.health_need || 0) / info.health_n * 1000) / 10 : null;
+}
+function getHealthColor(p) {
+  return p === null ? '#cccccc' : p >= 40 ? '#cb181d' : p >= 35 ? '#fb6a4a' : p >= 30 ? '#fcae91' : '#fee5d9';
+}
+function setMode(mode) {
+  Object.entries(circles).forEach(([gov, {circle, info}]) => {
+    if (mode === 'health') {
+      const p = healthPct(info);
+      circle.setStyle({ fillColor: getHealthColor(p) });
+      circle.setRadius(Math.max(8, Math.min(30, (info.health_need || 0) * 0.15 + 8)));
+    } else {
+      circle.setStyle({ fillColor: getColor(info.total) });
+      circle.setRadius(Math.max(8, Math.min(30, info.total * 3)));
+    }
+  });
+  document.getElementById('modeCount').className = 'btn ' + (mode === 'count' ? 'btn-primary' : 'btn-outline-primary');
+  document.getElementById('modeHealth').className = 'btn ' + (mode === 'health' ? 'btn-danger' : 'btn-outline-danger');
+  document.getElementById('legendCount').style.setProperty('display', mode === 'count' ? '' : 'none', mode === 'count' ? '' : 'important');
+  document.getElementById('legendHealth').style.setProperty('display', mode === 'health' ? '' : 'none', mode === 'health' ? '' : 'important');
+}
+document.getElementById('modeCount').addEventListener('click', () => setMode('count'));
+document.getElementById('modeHealth').addEventListener('click', () => setMode('health'));
+
+// إضافة دوائر على الخريطة
+Object.entries(allGovs).sort((a,b) => b[1].total - a[1].total).forEach(([gov, info]) => {
+  const coords = govCoords[gov];
+  if (coords) {
+    const circle = L.circleMarker(coords, {
+      radius: Math.max(8, Math.min(30, info.total * 3)),
+      fillColor: getColor(info.total),
+      color: '#fff',
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.85
+    }).addTo(map);
+
+    circles[gov] = { circle, info };
+    const hp = healthPct(info);
+    const healthRow = hp === null
+      ? `<div class="text-muted" style="font-size:12px">لا توجد بيانات صحية مسجلة</div>`
+      : `<div>تحتاج متابعة صحية: <b style="color:#c1121f">${info.health_need || 0}</b> من ${info.health_n} (${hp}%)</div>
+         <div>حوامل بدون متابعة: <b>${info.preg_unmon || 0}</b></div>`;
+    const mapsLink = `<a href="https://www.google.com/maps/search/${encodeURIComponent('وحدة صحية ' + gov)}" target="_blank" rel="noopener">ابحث عن وحدة صحية في ${gov}</a>`;
+    const disabilityRow = (info.disability_pct !== null && info.disability_pct !== undefined)
+      ? `<div>نسبة الإعاقة (CAPMAS): <b style="color:#2a6f97">${info.disability_pct}%</b></div>`
+      : `<div class="text-muted" style="font-size:12px">لا توجد بيانات إعاقة منشورة لهذه المحافظة</div>`;
+
+    circle.bindPopup(`
+      <div style="text-align:right;direction:rtl;min-width:180px">
+        <b style="font-size:15px">${gov}</b><hr style="margin:6px 0">
+        <div>إجمالي الأسر: <b>${info.total}</b></div>
+        <div>مؤهلة للدعم: <b>${info.eligible}</b></div>
+        <div>أولوية قصوى: <b style="color:#e63946">${info.high_priority}</b></div>
+        <hr style="margin:6px 0">
+        ${disabilityRow}
+        <hr style="margin:6px 0">
+        ${healthRow}
+        <div style="margin-top:6px;font-size:12px">${mapsLink}</div>
+      </div>
+    `);
+  }
+
+  // قائمة جانبية
+  const pct = info.eligible > 0 ? Math.round(info.eligible/info.total*100) : 0;
+  govList.innerHTML += `
+    <li class="list-group-item py-2 px-3">
+      <div class="d-flex justify-content-between">
+        <span class="fw-bold small">${gov}</span>
+        <span class="badge rounded-pill" style="background:${getColor(info.total)};color:#333">${info.total}</span>
+      </div>
+      <div class="progress mt-1" style="height:4px">
+        <div class="progress-bar bg-success" style="width:${pct}%"></div>
+      </div>
+      <small class="text-muted">${info.eligible} مؤهلة (${pct}%)</small>
+    </li>`;
+});
+
+// كروت المؤشرات القومية (CAPMAS) - مصر كلها
+const niEl = document.getElementById('nationalIndicators');
+const ni = nationalIndicators;
+const cards = [
+  { label: "عدد السكان", value: ni.total_population ? ni.total_population.toLocaleString('en-US') : '—', sub: `سنة ${ni.population_year || ''}` },
+  { label: "التضخم السنوي (آخر شهر)", value: ni.latest_annual_inflation_pct + '%', sub: ni.latest_annual_inflation_month || '' },
+  { label: "متوسط التضخم السنوي 2024", value: ni.avg_annual_inflation_2024_pct + '%', sub: '' },
+  { label: "نسبة الإعاقة (كل مصر)", value: ni.disability_all_levels_pct + '%', sub: `شديدة: ${ni.disability_severe_pct}%` },
+  { label: "المواليد 2025 (بالألف)", value: ni.live_births_2025_thousand, sub: `الوفيات: ${ni.deaths_2025_thousand} بالألف` },
+];
+niEl.innerHTML = cards.map(c => `
+  <div class="col-6 col-md-2">
+    <div class="p-2 border rounded h-100">
+      <div class="text-muted small">${c.label}</div>
+      <div class="fw-bold fs-5">${c.value ?? '—'}</div>
+      <div class="text-muted" style="font-size:11px">${c.sub}</div>
+    </div>
+  </div>`).join('');
+
+// أسعار الغذاء كصف منفصل
+if (ni.food_prices_egp_per_kg) {
+  const foodItems = Object.entries(ni.food_prices_egp_per_kg)
+    .map(([k, v]) => `<span class="badge bg-light text-dark border me-2 mb-1">${k}: ${v} ج.م</span>`)
+    .join('');
+  niEl.innerHTML += `<div class="col-12 mt-2"><div class="text-muted small mb-1">أسعار غذاء (CAPMAS):</div>${foodItems}</div>`;
+}
+</script>
+{% endblock %}

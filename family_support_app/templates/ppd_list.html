@@ -1,0 +1,50 @@
+{% extends layout %}
+{% block title %}اكتئاب ما بعد الولادة{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <h3 class="fw-bold"><i class="bi bi-heart me-2"></i>اكتئاب ما بعد الولادة — قائمة الأخصائي النفسي</h3>
+  <p class="text-muted">الأمهات اللي وُلد لهن طفل خلال آخر {{ cfg.ppd_window_months }} شهر. القائمة ترشيح للمسح والمتابعة، والتقييم والقرار للأخصائي. البيانات هنا حساسة ومحدودة لدورك فقط.</p>
+
+  <div class="row g-2 mb-3 text-center">
+    <div class="col-6 col-md-3"><a class="text-decoration-none" href="?show=all"><div class="card"><div class="card-body py-2"><div class="fs-4 fw-bold">{{ counts.total }}</div><div class="small text-muted">أمهات في الفترة</div></div></div></a></div>
+    <div class="col-6 col-md-3"><a class="text-decoration-none" href="?show=unscreened"><div class="card"><div class="card-body py-2"><div class="fs-4 fw-bold text-secondary">{{ counts.unscreened }}</div><div class="small text-muted">لم يُمسحن بعد</div></div></div></a></div>
+    <div class="col-6 col-md-3"><a class="text-decoration-none" href="?show=needs"><div class="card"><div class="card-body py-2"><div class="fs-4 fw-bold text-warning">{{ counts.needs }}</div><div class="small text-muted">يحتجن تقييم</div></div></div></a></div>
+    <div class="col-6 col-md-3"><a class="text-decoration-none" href="?show=urgent"><div class="card border-danger"><div class="card-body py-2"><div class="fs-4 fw-bold text-danger">{{ counts.urgent }}</div><div class="small text-muted">عاجل</div></div></div></a></div>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light"><tr><th>#</th><th>الأم / رب الأسرة</th><th>المحافظة</th><th>تاريخ الولادة</th><th>منذ (يوم)</th><th>آخر مسح</th><th>الحالة</th><th></th></tr></thead>
+        <tbody>
+        {% for it in items %}
+          <tr>
+            <td>{{ offset + loop.index }}</td>
+            <td>{{ it.row['اسم رب الأسرة'] }}</td>
+            <td>{{ it.row['المحافظة'] }}</td>
+            <td>{{ it.row['تاريخ آخر ولادة'] }}</td>
+            <td>{{ it.days }}</td>
+            <td>{% if it.last %}{{ it.last.date }} {% if it.last.epds != '' %}(الدرجة {{ it.last.epds }}){% endif %}{% else %}—{% endif %}</td>
+            <td>
+              {% set cls = {'عاجل':'danger','يحتاج تقييم':'warning','لا مؤشر':'success'}.get(it.risk,'secondary') %}
+              <span class="badge bg-{{ cls }}">{{ it.risk }}</span>
+            </td>
+            <td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('ppd_record', index=it.idx) }}">فتح</a></td>
+          </tr>
+        {% else %}
+          <tr><td colspan="8" class="text-center text-muted py-4">لا توجد حالات مطابقة.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if pages > 1 %}
+    <div class="card-footer d-flex justify-content-center gap-2">
+      {% if page > 1 %}<a class="btn btn-sm btn-outline-primary" href="?show={{ show }}&page={{ page-1 }}">السابق</a>{% endif %}
+      <span class="align-self-center small">{{ page }} / {{ pages }}</span>
+      {% if page < pages %}<a class="btn btn-sm btn-outline-primary" href="?show={{ show }}&page={{ page+1 }}">التالي</a>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+  <div class="small text-muted mt-2">حد "يحتاج تقييم": درجة ≥ {{ cfg.epds_cutoff }} (قيمة افتراضية — المرجع: {{ cfg.epds_source or 'غير محدد، اكتبه في data/health_schedule.json' }}).</div>
+</div>
+{% endblock %}

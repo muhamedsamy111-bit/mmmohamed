@@ -1,0 +1,21 @@
+{
+  "assessors": [
+    {
+      "id": "IMAM_001",
+      "name": "الشيخ أحمد محمد",
+      "role": "إمام مسجد",
+      "area": "حي السلام، القاهرة",
+      "trust_score": 95,
+      "families_assessed": 0
+    },
+    {
+      "id": "SHEIKH_001",
+      "name": "الحاج محمود عبد الرحمن",
+      "role": "شيخ حي",
+      "area": "عزبة النخل، القاهرة",
+      "trust_score": 92,
+      "families_assessed": 0
+    }
+  ],
+  "assessments": []
+}

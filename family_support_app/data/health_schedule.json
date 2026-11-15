@@ -1,0 +1,9 @@
+{
+  "_note": "القيم دي افتراضية للعرض فقط. استبدلها بالجدول الرسمي لوزارة الصحة، واكتب المصدر في schedule_source و threshold_source.",
+  "pregnancy_followup_days": 30,
+  "vaccination_followup_days": 90,
+  "schedule_source": "",
+  "catastrophic_threshold_pct": 10,
+  "severe_threshold_pct": 25,
+  "threshold_source": ""
+}

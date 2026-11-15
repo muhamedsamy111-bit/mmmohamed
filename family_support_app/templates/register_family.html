@@ -1,0 +1,308 @@
+{% extends "base_public.html" %}
+
+{% block title %}تسجيل أسرة جديدة{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <h5 class="section-title"><i class="bi bi-person-plus me-2"></i>تسجيل بيانات أسرة جديدة</h5>
+            <p class="text-muted small mb-4">
+            سجّلي بيانات دقيقة لمتابعة احتياجات الأم والأطفال. البيانات الصحية للتوجيه والمتابعة وليست تشخيصًا طبيًا.
+            </p>
+
+            {% if message %}
+            <div class="alert {% if message.startswith('✅') %}alert-success{% else %}alert-danger{% endif %}">{{ message }}</div>
+            {% endif %}
+
+            <div class="card border-0 shadow-sm registration-card">
+                <div class="card-body p-4 p-lg-5">
+                    <form method="POST" action="/register-family" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">اسم رب الأسرة <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="name" required placeholder="أدخل اسم رب الأسرة">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">الرقم القومي <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="national_id" required maxlength="14" minlength="14" inputmode="numeric" autocomplete="off" placeholder="١٤ رقمًا">
+                                <div class="form-text">سيتم التحقق من العمر من تاريخ الميلاد المضمّن بالرقم القومي.</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">العمر <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" name="age" required min="0" max="120" placeholder="العمر بالسنوات">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">البريد الإلكتروني</label>
+                                <input type="email" class="form-control" name="email" placeholder="example@email.com">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">المحافظة <span class="text-danger">*</span></label>
+                                <select class="form-select" name="governorate" required>
+                                    <option value="">اختر المحافظة</option>
+                                    <option value="القاهرة">القاهرة</option>
+                                    <option value="الجيزة">الجيزة</option>
+                                    <option value="الإسكندرية">الإسكندرية</option>
+                                    <option value="القليوبية">القليوبية</option>
+                                    <option value="الشرقية">الشرقية</option>
+                                    <option value="الدقهلية">الدقهلية</option>
+                                    <option value="الغربية">الغربية</option>
+                                    <option value="كفر الشيخ">كفر الشيخ</option>
+                                    <option value="المنوفية">المنوفية</option>
+                                    <option value="البحيرة">البحيرة</option>
+                                    <option value="بني سويف">بني سويف</option>
+                                    <option value="الفيوم">الفيوم</option>
+                                    <option value="المنيا">المنيا</option>
+                                    <option value="أسيوط">أسيوط</option>
+                                    <option value="سوهاج">سوهاج</option>
+                                    <option value="قنا">قنا</option>
+                                    <option value="الأقصر">الأقصر</option>
+                                    <option value="أسوان">أسوان</option>
+                                    <option value="البحر الأحمر">البحر الأحمر</option>
+                                    <option value="السويس">السويس</option>
+                                    <option value="بورسعيد">بورسعيد</option>
+                                    <option value="الإسماعيلية">الإسماعيلية</option>
+                                    <option value="شمال سيناء">شمال سيناء</option>
+                                    <option value="جنوب سيناء">جنوب سيناء</option>
+                                    <option value="الوادي الجديد">الوادي الجديد</option>
+                                    <option value="مطروح">مطروح</option>
+                                    <option value="دمياط">دمياط</option>
+                                </select>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label class="form-label">العنوان التفصيلي <span class="text-danger">*</span></label>
+                                <textarea class="form-control" name="address" required rows="2" maxlength="300" placeholder="الشارع، رقم العقار، الحي أو القرية، وأقرب علامة مميزة"></textarea>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">عدد الأطفال <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" name="children" required min="0" placeholder="أدخل عدد الأطفال">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">هل يوجد توائم بين الأطفال؟ <span class="text-danger">*</span></label>
+                                <select class="form-select" name="children_multiples" id="childrenMultiples" required>
+                                    <option value="لا يوجد توائم بين الأطفال">لا يوجد</option>
+                                    <option value="توأم">نعم، توأم</option>
+                                    <option value="ثلاثة توائم أو أكثر">نعم، ثلاثة توائم أو أكثر</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">الدخل الشهري (جنيه) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" name="income" required min="0" value="0">
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">هل يوجد معيل معاق؟ <span class="text-danger">*</span></label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="has_disabled" id="disabled_yes" value="نعم" checked>
+                                    <label class="form-check-label" for="disabled_yes">نعم</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="has_disabled" id="disabled_no" value="لا">
+                                    <label class="form-check-label" for="disabled_no">لا</label>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">هل توجد أيتام في الأسرة؟ <span class="text-danger">*</span></label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="has_orphans" id="orphans_yes" value="نعم">
+                                    <label class="form-check-label" for="orphans_yes">نعم</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="has_orphans" id="orphans_no" value="لا" checked>
+                                    <label class="form-check-label" for="orphans_no">لا</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        <div class="form-section-heading mb-3">
+                            <span class="section-icon"><i class="bi bi-heart-pulse"></i></span>
+                            <div><h6 class="fw-bold mb-1">بيانات الحمل والصحة</h6><p class="text-muted small mb-0">للمتابعة وتحديد الاحتياج فقط، وليست تشخيصًا طبيًا.</p></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">هل يوجد حمل حالي؟ <span class="text-danger">*</span></label>
+                                <select class="form-select" name="pregnant" id="pregnant" required><option value="">اختاري</option><option value="لا">لا</option><option value="نعم">نعم</option></select>
+                            </div>
+                            <div class="col-md-4 mb-3 pregnancy-detail d-none">
+                                <label class="form-label">نوع الحمل <span class="text-danger">*</span></label>
+                                <select class="form-select" name="pregnancy_kind" id="pregnancyKind"><option value="">اختاري</option><option value="مفرد">حمل مفرد</option><option value="توأم">توأم</option><option value="ثلاثة توائم أو أكثر">ثلاثة توائم أو أكثر</option></select>
+                            </div>
+                            <div class="col-md-4 mb-3 pregnancy-detail d-none">
+                                <label class="form-label">عدد الأجنة <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" name="fetus_count" id="fetusCount" min="1" max="10" placeholder="عدد الأجنة">
+                            </div>
+                            <div class="col-md-4 mb-3 pregnancy-detail d-none">
+                                <label class="form-label">هل تتابع الحمل؟</label>
+                                <select class="form-select" name="pregnancy_followup"><option value="نعم">نعم</option><option value="لا">لا</option></select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">عدد الأطفال تحت 5 سنوات</label>
+                                <input type="number" class="form-control" name="under5" min="0" value="0">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">التطعيمات مكتملة؟</label>
+                                <select class="form-select" name="vaccines_complete"><option value="نعم">نعم</option><option value="لا">لا</option></select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">مرض مزمن في الأسرة؟</label>
+                                <select class="form-select" name="chronic"><option value="لا">لا</option><option value="نعم">نعم</option></select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">علامات سوء تغذية عند الأطفال؟</label>
+                                <select class="form-select" name="malnutrition"><option value="لا">لا</option><option value="نعم">نعم</option></select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">تكلفة العلاج والدواء الشهرية (جنيه)</label>
+                                <input type="number" class="form-control" name="treatment_cost" min="0" value="0">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">تاريخ آخر متابعة حمل</label>
+                                <input type="date" class="form-control" name="last_pregnancy_visit">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">تاريخ آخر تطعيم/متابعة للأطفال</label>
+                                <input type="date" class="form-control" name="last_vaccine">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">تاريخ آخر ولادة (لو وُلد طفل حديثًا)</label>
+                                <input type="date" class="form-control" name="last_delivery">
+                            </div>
+                        </div>
+
+
+                        <hr class="my-4">
+                        <div class="form-section-heading mb-3">
+                            <span class="section-icon"><i class="bi bi-shield-check"></i></span>
+                            <div><h6 class="fw-bold mb-1">المستندات المطلوبة</h6><p class="text-muted small mb-0">الصور والملفات بصيغة JPG أو PNG أو PDF، حتى 5 ميجابايت للملف.</p></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">صورة بطاقة الرقم القومي <span class="text-danger">*</span></label>
+                                <input type="file" class="form-control" name="id_document" accept=".jpg,.jpeg,.png,.pdf" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">هل لديكِ تأمين صحي؟ <span class="text-danger">*</span></label>
+                                <select class="form-select" name="has_health_insurance" id="hasHealthInsurance" required><option value="">اختاري</option><option value="لا">لا</option><option value="نعم">نعم</option></select>
+                            </div>
+                            <div class="col-md-6 mb-3 d-none" id="insuranceDocumentField">
+                                <label class="form-label">صورة بطاقة التأمين الصحي <span class="text-danger">*</span></label>
+                                <input type="file" class="form-control" name="health_insurance_document" id="insuranceDocument" accept=".jpg,.jpeg,.png,.pdf">
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">شهادات ميلاد الأطفال <span class="text-danger">*</span></label>
+                                <p class="form-text">ارفعي شهادة منفصلة لكل طفل. يجب أن يساوي عدد الملفات عدد الأطفال المسجل أعلاه.</p>
+                                <div id="childCertificateFields" class="row g-3"></div>
+                                <div id="childCertificateHelp" class="small text-muted">أدخلي عدد الأطفال بالأعلى لإظهار حقول شهادات الميلاد.</div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-2">
+                            <button type="submit" class="btn btn-lg btn-brand-submit">
+                                <i class="bi bi-send me-2"></i>إرسال بيانات الأسرة
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-3">
+                <a href="/home" class="text-decoration-none small"><i class="bi bi-arrow-right me-1"></i>الرجوع للصفحة الرئيسية</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(() => {
+    const pregnancySelect = document.getElementById('pregnant');
+    const pregnancyFields = document.querySelectorAll('.pregnancy-detail');
+    const kindSelect = document.getElementById('pregnancyKind');
+    const fetusCount = document.getElementById('fetusCount');
+    const insuranceSelect = document.getElementById('hasHealthInsurance');
+    const insuranceField = document.getElementById('insuranceDocumentField');
+    const insuranceInput = document.getElementById('insuranceDocument');
+    const childrenInput = document.querySelector('[name="children"]');
+    const certificateFields = document.getElementById('childCertificateFields');
+    const certificateHelp = document.getElementById('childCertificateHelp');
+
+    function syncPregnancyFields() {
+        const active = pregnancySelect.value === 'نعم';
+        pregnancyFields.forEach((field) => field.classList.toggle('d-none', !active));
+        kindSelect.required = active;
+        fetusCount.required = active;
+    }
+
+    function syncInsuranceField() {
+        const active = insuranceSelect.value === 'نعم';
+        insuranceField.classList.toggle('d-none', !active);
+        insuranceInput.required = active;
+    }
+
+    function renderChildCertificates() {
+        const count = Math.max(0, Math.min(Number.parseInt(childrenInput.value, 10) || 0, 20));
+        certificateFields.replaceChildren();
+        certificateHelp.textContent = count ? `مطلوب رفع ${count} شهادة ميلاد، ملف منفصل لكل طفل.` : 'لا يوجد أطفال مسجلون؛ لا يلزم رفع شهادات ميلاد.';
+        for (let index = 1; index <= count; index += 1) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'col-md-6';
+            const label = document.createElement('label');
+            label.className = 'form-label';
+            label.textContent = `شهادة ميلاد الطفل ${index}`;
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.name = 'child_birth_certificates';
+            input.accept = '.jpg,.jpeg,.png,.pdf';
+            input.required = true;
+            input.className = 'form-control';
+            const nameLabel = document.createElement('label');
+            nameLabel.className = 'form-label mt-2';
+            nameLabel.textContent = `اسم الطفل ${index}`;
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.name = 'child_names';
+            nameInput.maxLength = 100;
+            nameInput.required = true;
+            nameInput.className = 'form-control';
+            nameInput.placeholder = 'الاسم كما هو في شهادة الميلاد';
+            const numLabel = document.createElement('label');
+            numLabel.className = 'form-label mt-2';
+            numLabel.textContent = `رقم شهادة ميلاد الطفل ${index}`;
+            const numInput = document.createElement('input');
+            numInput.type = 'text';
+            numInput.name = 'child_cert_numbers';
+            numInput.maxLength = 50;
+            numInput.required = true;
+            numInput.className = 'form-control';
+            numInput.placeholder = 'الرقم المطبوع على الشهادة';
+            numInput.dir = 'ltr';
+            wrapper.append(label, input, nameLabel, nameInput, numLabel, numInput);
+            certificateFields.append(wrapper);
+        }
+    }
+
+    pregnancySelect.addEventListener('change', syncPregnancyFields);
+    insuranceSelect.addEventListener('change', syncInsuranceField);
+    childrenInput.addEventListener('input', renderChildCertificates);
+    kindSelect.addEventListener('change', () => {
+        const expected = kindSelect.value === 'مفرد' ? 1 : kindSelect.value === 'توأم' ? 2 : null;
+        if (expected) fetusCount.value = expected;
+        else if (fetusCount.value && Number(fetusCount.value) < 3) fetusCount.value = 3;
+    });
+    syncPregnancyFields();
+    syncInsuranceField();
+    renderChildCertificates();
+})();
+</script>
+{% endblock %}

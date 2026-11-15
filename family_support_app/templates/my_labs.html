@@ -1,0 +1,77 @@
+{% extends "base_public.html" %}
+{% block title %}تحاليل الفيتامينات والمعادن{% endblock %}
+{% block content %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      <h5 class="section-title"><i class="bi bi-file-earmark-medical me-2"></i>صور تحاليل الفيتامينات والمعادن</h5>
+      <div class="alert alert-info small">
+        ارفع صور تحاليلك (فيتامينات، معادن زي الحديد والكالسيوم، أو أي تحاليل أخرى) علشان تتخزن كنسخة احتياطية لو ضاعت منك.
+        الصور بتتحفظ للرجوع إليها فقط، <strong>والنظام مش بيفسّر النتايج</strong>. بيشوفها الأخصائي المختص بس. تقدر تحذف أي صورة في أي وقت.
+      </div>
+
+      {% if families|length == 0 %}
+      <div class="alert alert-warning">لازم تقدّم طلب دعم الأول علشان تقدر ترفع تحاليلك. <a href="/register-family">قدّم طلبك من هنا</a>.</div>
+      {% endif %}
+
+      {% for f in families %}
+      {% set nid = f['الرقم القومي'] %}
+      {% set mine = labs.get(nid, []) %}
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+          <div class="d-flex justify-content-between flex-wrap">
+            <h6 class="fw-bold">{{ f['اسم رب الأسرة'] }} — {{ f['المحافظة'] }}</h6>
+            {% if mine|length == 0 %}<span class="badge bg-danger">مطلوب رفع التحاليل</span>{% else %}<span class="badge bg-success">{{ mine|length }} صورة محفوظة</span>{% endif %}
+          </div>
+
+          <form method="POST" enctype="multipart/form-data" class="row g-2 mt-2">
+            <input type="hidden" name="nid" value="{{ nid }}">
+            <div class="col-md-4">
+              <label class="form-label small">نوع التحليل</label>
+              <select name="category" class="form-select form-select-sm">{% for c in categories %}<option>{{ c }}</option>{% endfor %}</select>
+            </div>
+            <div class="col-md-8">
+              <label class="form-label small">ملاحظة (اختياري)</label>
+              <input type="text" name="note" maxlength="200" class="form-control form-control-sm" placeholder="مثال: تحليل فيتامين د — أغسطس">
+            </div>
+            <div class="col-12">
+              <label class="form-label small">الصور (jpg / png / webp — حتى 5 صور، كل واحدة أقل من {{ max_mb }} ميجا)</label>
+              <input type="file" name="lab_images" accept="image/jpeg,image/png,image/webp" multiple class="form-control form-control-sm">
+            </div>
+            <div class="col-12 form-check ms-2">
+              <input type="checkbox" class="form-check-input" id="consent{{ loop.index }}" name="consent" value="1">
+              <label class="form-check-label small" for="consent{{ loop.index }}">أوافق على حفظ صور التحاليل للرجوع إليها فقط</label>
+            </div>
+            <div class="col-12"><button class="btn btn-success btn-sm" type="submit"><i class="bi bi-upload me-1"></i>رفع</button></div>
+          </form>
+
+          {% if mine %}
+          <hr>
+          <div class="row g-2">
+            {% for e in mine %}
+            <div class="col-6 col-md-3">
+              <div class="border rounded p-1 text-center small">
+                <a href="{{ url_for('download_lab', nid=nid, fname=e.filename) }}" target="_blank">
+                  <img src="{{ url_for('download_lab', nid=nid, fname=e.filename) }}" alt="تحليل" style="max-width:100%;max-height:120px;object-fit:cover">
+                </a>
+                <div class="mt-1"><span class="badge bg-secondary">{{ e.category }}</span></div>
+                <div class="text-muted">{{ e.uploaded_at }}</div>
+                {% if e.note %}<div>{{ e.note }}</div>{% endif %}
+                <form method="POST" onsubmit="return confirm('حذف الصورة؟');" class="mt-1">
+                  <input type="hidden" name="action" value="delete"><input type="hidden" name="nid" value="{{ nid }}"><input type="hidden" name="lab_id" value="{{ e.id }}">
+                  <button class="btn btn-outline-danger btn-sm py-0" type="submit"><i class="bi bi-trash"></i></button>
+                </form>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+
+      <div class="text-center mt-3"><a href="/account" class="text-decoration-none small"><i class="bi bi-arrow-right me-1"></i>الرجوع لحسابي</a></div>
+    </div>
+  </div>
+</div>
+{% endblock %}

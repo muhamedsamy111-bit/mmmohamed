@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+{% block title %}مقارنة الأسر{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="text-center mb-4">
+    <h2 class="fw-bold text-dark"><i class="bi bi-layout-columns me-2"></i>مقارنة الأسر جنباً لجنب</h2>
+    <p class="text-muted">اختار أسرتين لمقارنة بياناتهما ونقاطهما</p>
+  </div>
+
+  <!-- Selection Form -->
+  <div class="card mb-4">
+    <div class="card-header"><i class="bi bi-search me-2"></i>اختيار الأسر</div>
+    <div class="card-body">
+      <form method="GET" action="/compare" class="row g-3 align-items-end">
+        <div class="col-md-5">
+          <label class="form-label fw-semibold">الأسرة الأولى</label>
+          <select name="f1" class="form-select">
+            <option value="">-- اختار أسرة --</option>
+            {% for f in families %}
+            <option value="{{ loop.index0 }}" {% if idx1 == loop.index0 %}selected{% endif %}>
+              {{ f.get('اسم رب الأسرة', '') }} - {{ f.get('المحافظة', '') }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-1 text-center">
+          <span class="fs-4 text-dark fw-bold">VS</span>
+        </div>
+        <div class="col-md-5">
+          <label class="form-label fw-semibold">الأسرة الثانية</label>
+          <select name="f2" class="form-select">
+            <option value="">-- اختار أسرة --</option>
+            {% for f in families %}
+            <option value="{{ loop.index0 }}" {% if idx2 == loop.index0 %}selected{% endif %}>
+              {{ f.get('اسم رب الأسرة', '') }} - {{ f.get('المحافظة', '') }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-1">
+          <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-arrow-repeat"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if family1 and family2 %}
+  <!-- Comparison Table -->
+  <div class="card mb-4">
+    <div class="card-header"><i class="bi bi-table me-2"></i>مقارنة البيانات</div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-bordered mb-0">
+          <thead>
+            <tr class="table-light">
+              <th class="text-center" style="width:30%">البيان</th>
+              <th class="text-center text-primary" style="width:35%">
+                <i class="bi bi-house-fill me-1"></i>{{ family1.get('اسم رب الأسرة','') }}
+              </th>
+              <th class="text-center text-success" style="width:35%">
+                <i class="bi bi-house-fill me-1"></i>{{ family2.get('اسم رب الأسرة','') }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {% set fields = [
+              ('المحافظة', 'المحافظة'),
+              ('عدد الأطفال', 'عدد الأطفال'),
+              ('الدخل الشهري', 'الدخل الشهري'),
+              ('معيل معاق', 'معيل معاق'),
+              ('أيتام', 'أيتام'),
+              ('مؤهل للدعم', 'مؤهل للدعم'),
+              ('درجة الأولوية', 'درجة الأولوية'),
+              ('مستوى الأولوية', 'مستوى الأولوية'),
+            ] %}
+            {% for label, key in fields %}
+            <tr>
+              <td class="fw-semibold text-center bg-light">{{ label }}</td>
+              {% set v1 = family1.get(key, '—') %}
+              {% set v2 = family2.get(key, '—') %}
+              <td class="text-center">
+                {% if key == 'درجة الأولوية' %}
+                  <span class="badge bg-primary rounded-pill fs-6">{{ v1 }}</span>
+                {% elif key == 'مستوى الأولوية' %}
+                  <span class="badge {% if 'قصوى' in v1 %}bg-danger{% elif 'متوسطة' in v1 %}bg-warning text-dark{% else %}bg-success{% endif %}">{{ v1 }}</span>
+                {% elif key in ['معيل معاق','أيتام','مؤهل للدعم'] %}
+                  <span class="badge {% if v1 == 'نعم' %}bg-success{% else %}bg-secondary{% endif %}">{{ v1 }}</span>
+                {% elif key == 'الدخل الشهري' %}
+                  {{ v1 }} جنيه
+                {% else %}
+                  {{ v1 }}
+                {% endif %}
+              </td>
+              <td class="text-center">
+                {% if key == 'درجة الأولوية' %}
+                  <span class="badge bg-success rounded-pill fs-6">{{ v2 }}</span>
+                {% elif key == 'مستوى الأولوية' %}
+                  <span class="badge {% if 'قصوى' in v2 %}bg-danger{% elif 'متوسطة' in v2 %}bg-warning text-dark{% else %}bg-success{% endif %}">{{ v2 }}</span>
+                {% elif key in ['معيل معاق','أيتام','مؤهل للدعم'] %}
+                  <span class="badge {% if v2 == 'نعم' %}bg-success{% else %}bg-secondary{% endif %}">{{ v2 }}</span>
+                {% elif key == 'الدخل الشهري' %}
+                  {{ v2 }} جنيه
+                {% else %}
+                  {{ v2 }}
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Score Breakdown Comparison -->
+  {% if comparison %}
+  <div class="row g-3 mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header"><i class="bi bi-bar-chart me-2"></i>تفصيل النقاط مقارنةً</div>
+        <div class="card-body">
+          {% set factors = [
+            ('children', 'الأطفال', 25),
+            ('income', 'الدخل', 35),
+            ('disability', 'الإعاقة', 25),
+            ('orphan', 'الأيتام', 15),
+            ('cumulative_bonus', 'مكافأة التراكم', 10),
+          ] %}
+          {% for key, label, max_val in factors %}
+          {% set s1 = comparison.breakdown1.get(key, 0) %}
+          {% set s2 = comparison.breakdown2.get(key, 0) %}
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <small class="fw-semibold">{{ label }} (حتى {{ max_val }} نقطة)</small>
+              <small class="text-muted">
+                <span class="text-primary">{{ s1 }}</span> vs <span class="text-success">{{ s2 }}</span>
+              </small>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+              <small class="text-primary" style="width:30px">{{ s1 }}</small>
+              <div class="flex-grow-1">
+                <div class="position-relative" style="height: 14px; background: #eee; border-radius: 10px;">
+                  <div class="position-absolute bg-primary" style="height:100%; width:{{ (s1/max_val*100)|round }}%; border-radius:10px; opacity:0.7;"></div>
+                  <div class="position-absolute bg-success" style="height:100%; width:{{ (s2/max_val*100)|round }}%; border-radius:10px; opacity:0.5; top:0;"></div>
+                </div>
+              </div>
+              <small class="text-success" style="width:30px">{{ s2 }}</small>
+            </div>
+          </div>
+          {% endfor %}
+
+          <!-- Total Score Bar -->
+          {% set total1 = family1.get('درجة الأولوية', 0)|int %}
+          {% set total2 = family2.get('درجة الأولوية', 0)|int %}
+          <hr>
+          <div class="row text-center g-3">
+            <div class="col-5">
+              <div class="rounded-3 p-3" style="background: #EEF2FF;">
+                <div class="fs-1 fw-bold text-primary">{{ total1 }}</div>
+                <div class="text-muted small">نقطة — {{ family1.get('اسم رب الأسرة','') }}</div>
+                <span class="badge {% if 'قصوى' in family1.get('مستوى الأولوية','') %}bg-danger{% elif 'متوسطة' in family1.get('مستوى الأولوية','') %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                  {{ family1.get('مستوى الأولوية','') }}
+                </span>
+              </div>
+            </div>
+            <div class="col-2 d-flex align-items-center justify-content-center">
+              <span class="fs-3 fw-bold text-muted">VS</span>
+            </div>
+            <div class="col-5">
+              <div class="rounded-3 p-3" style="background: #EFFFEF;">
+                <div class="fs-1 fw-bold text-success">{{ total2 }}</div>
+                <div class="text-muted small">نقطة — {{ family2.get('اسم رب الأسرة','') }}</div>
+                <span class="badge {% if 'قصوى' in family2.get('مستوى الأولوية','') %}bg-danger{% elif 'متوسطة' in family2.get('مستوى الأولوية','') %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                  {{ family2.get('مستوى الأولوية','') }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Winner -->
+          <div class="text-center mt-3">
+            {% if total1 > total2 %}
+            <div class="alert alert-primary rounded-3">
+              <i class="bi bi-trophy-fill me-2"></i>
+              <strong>{{ family1.get('اسم رب الأسرة','') }}</strong> أكثر احتياجاً للدعم بفارق {{ total1 - total2 }} نقطة
+            </div>
+            {% elif total2 > total1 %}
+            <div class="alert alert-success rounded-3">
+              <i class="bi bi-trophy-fill me-2"></i>
+              <strong>{{ family2.get('اسم رب الأسرة','') }}</strong> أكثر احتياجاً للدعم بفارق {{ total2 - total1 }} نقطة
+            </div>
+            {% else %}
+            <div class="alert alert-secondary rounded-3">
+              <i class="bi bi-dash-circle me-2"></i>الأسرتان متساويتان في النقاط
+            </div>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="card">
+    <div class="card-body text-center py-5 text-muted">
+      <i class="bi bi-layout-columns fs-1 mb-3 d-block"></i>
+      <h5>اختار أسرتين من القائمة بالأعلى لبدء المقارنة</h5>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>ورقة إحالة صحية — {{ ref }}</title>
+<style>
+  body { font-family: Tahoma, "Segoe UI", Arial, sans-serif; margin: 0; background: #f2f2f2; color: #111; }
+  .page { width: 190mm; min-height: 270mm; margin: 10px auto; background: #fff; padding: 14mm; box-sizing: border-box; }
+  h1 { font-size: 22px; text-align: center; margin: 0 0 4px; }
+  .sub { text-align: center; color: #555; font-size: 12px; margin-bottom: 14px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  td, th { border: 1px solid #999; padding: 6px 8px; font-size: 14px; text-align: right; }
+  th { background: #eee; width: 32%; }
+  h2 { font-size: 15px; margin: 14px 0 6px; border-bottom: 2px solid #444; padding-bottom: 3px; }
+  .reason { display: inline-block; border: 1px solid #b00; color: #b00; border-radius: 4px; padding: 2px 8px; margin: 2px; font-size: 13px; }
+  .note { font-size: 12px; color: #333; border: 1px dashed #888; padding: 8px; margin-top: 10px; }
+  .sign { display: flex; justify-content: space-between; margin-top: 40px; font-size: 14px; }
+  .sign div { width: 45%; border-top: 1px solid #000; padding-top: 6px; text-align: center; }
+  .bar { text-align: center; margin: 10px; }
+  .bar button { padding: 8px 18px; font-size: 15px; cursor: pointer; }
+  @media print { body { background: #fff; } .page { margin: 0; width: auto; padding: 8mm; } .bar { display: none; } }
+</style>
+</head>
+<body>
+<div class="bar"><button onclick="window.print()">🖨️ طباعة / حفظ كـ PDF</button> <button onclick="window.close()">إغلاق</button></div>
+<div class="page">
+  <h1>ورقة إحالة صحية</h1>
+  <div class="sub">رقم مرجعي: {{ ref }} — تاريخ الإصدار: {{ today }}</div>
+
+  <h2>بيانات الأسرة</h2>
+  <table>
+    <tr><th>اسم رب الأسرة</th><td>{{ family['اسم رب الأسرة'] }}</td></tr>
+    <tr><th>الرقم القومي</th><td dir="ltr" style="text-align:right">{{ family['الرقم القومي'] }}</td></tr>
+    <tr><th>المحافظة</th><td>{{ family['المحافظة'] }}</td></tr>
+    <tr><th>عدد أفراد الأسرة / الأطفال / تحت 5 سنوات</th><td>{{ family['عدد أفراد الأسرة'] or '—' }} / {{ family['عدد الأطفال'] }} / {{ family['أطفال تحت 5'] or '—' }}</td></tr>
+    <tr><th>الدخل الشهري</th><td>{{ family['الدخل الشهري'] }} جنيه</td></tr>
+  </table>
+
+  <h2>سبب الإحالة (تنبيهات المتابعة)</h2>
+  <p>{% for a in alerts %}<span class="reason">{{ alert_types[a] }}</span>{% else %}لا توجد تنبيهات مسجلة.{% endfor %}</p>
+
+  <h2>البيانات الصحية المسجلة</h2>
+  <table>
+    <tr><th>حامل / متابعة الحمل / آخر متابعة</th><td>{{ family['حامل'] or '—' }} / {{ family['متابعة حمل'] or '—' }} / {{ family['آخر متابعة حمل'] or '—' }}</td></tr>
+    <tr><th>التطعيمات مكتملة / آخر تطعيم</th><td>{{ family['تطعيمات مكتملة'] or '—' }} / {{ family['آخر تطعيم'] or '—' }}</td></tr>
+    <tr><th>مرض مزمن في الأسرة</th><td>{{ family['مرض مزمن'] or '—' }}</td></tr>
+    <tr><th>علامات سوء تغذية</th><td>{{ family['سوء تغذية'] or '—' }}</td></tr>
+    <tr><th>تكلفة العلاج الشهرية / نسبتها من الدخل</th><td>{{ family['تكلفة العلاج الشهرية'] or '—' }} جنيه / {{ burden }}</td></tr>
+    <tr><th>الدرجات (اجتماعية / صحية / إجمالية)</th><td>{{ family['درجة الأولوية'] }} / {{ family['درجة الأولوية الصحية'] or '—' }} ({{ family['مستوى الأولوية الصحية'] or '—' }}) / {{ total }}</td></tr>
+  </table>
+
+  <h2>جهة الإحالة</h2>
+  <table>
+    <tr><th>الوحدة / المستشفى المحال إليها</th><td>&nbsp;</td></tr>
+    <tr><th>ملاحظات الأخصائي</th><td style="height:60px">&nbsp;</td></tr>
+  </table>
+
+  <div class="note">هذه الورقة ترشيح للمتابعة بناءً على بيانات مسجلة، وليست تشخيصًا طبيًا ولا وصفة علاج. القرار الطبي للجهة الصحية المختصة.</div>
+
+  <div class="sign">
+    <div>الأخصائي: {{ issuer }}</div>
+    <div>استلام الجهة الصحية (توقيع وختم)</div>
+  </div>
+</div>
+</body>
+</html>

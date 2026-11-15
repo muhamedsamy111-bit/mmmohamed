@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "source": "CAPMAS",
+    "note_ar": "نسبة الإعاقة متاحة لـ 9 محافظات فقط في مصدر البيانات. باقي المحافظات (18) لا توجد لها بيانات إعاقة رسمية منشورة."
+  },
+  "disability_by_governorate": {
+    "الشرقية": 7.5,
+    "دمياط": 7.0,
+    "الدقهلية": 6.2,
+    "الإسكندرية": 5.5,
+    "بني سويف": 5.3,
+    "أسيوط": 2.9,
+    "مطروح": 2.6,
+    "البحر الأحمر": 2.1,
+    "جنوب سيناء": 1.8
+  },
+  "national_indicators": {
+    "note_ar": "الأرقام دي على مستوى مصر كلها (مش لكل محافظة) لأن المصدر بينشرها قومي بس",
+    "disability_all_levels_pct": 11.0,
+    "disability_severe_pct": 4.86,
+    "latest_annual_inflation_pct": 23.2,
+    "latest_annual_inflation_month": "2025-01",
+    "latest_monthly_inflation_pct": 1.6,
+    "avg_annual_inflation_2024_pct": 27.79,
+    "total_population": 107300000,
+    "population_year": 2025,
+    "male_population": 55200000,
+    "female_population": 52200000,
+    "live_births_2025_thousand": 163.8,
+    "deaths_2025_thousand": 57.9,
+    "food_prices_egp_per_kg": {
+      "Baladi Normal Wheat": 24.25,
+      "Cow & Buffalo Meat (Fresh)": 333.59,
+      "Cotton Seed Oil (1 Liter)": 106.99,
+      "Baladi Poultry": 53.41
+    }
+  }
+}

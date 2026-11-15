@@ -1,0 +1,58 @@
+{% extends layout %}
+{% block title %}فجوة الخدمة الصحية{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="mb-3">
+    <h3 class="fw-bold"><i class="bi bi-hospital me-2"></i>فجوة الخدمة الصحية</h3>
+    <p class="text-muted mb-0">بيقارن عدد الأسر المحتاجة لمتابعة صحية بعدد الوحدات الصحية في كل محافظة (أسر محتاجة لكل وحدة). الأعلى = ضغط أكبر على الوحدات.</p>
+  </div>
+
+  <div class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle me-1"></i>
+    أعداد الوحدات لازم تتدخل من مصدر رسمي (وزارة الصحة / الكتاب الإحصائي). النظام ما بيحطش أرقام من عنده.
+    وعدد الأسر في النظام عينة وليس كل السكان، فالمقارنة بين المحافظات بتكون مفيدة بس لو توزيع العينة معقول.
+    {% if filled == 0 %}<strong>لسه ما اتدخلتش أي بيانات.</strong>{% else %}<strong>المصدر المسجل:</strong> {{ source or 'غير محدد' }}{% if year %} ({{ year }}){% endif %}{% endif %}
+  </div>
+
+  <div class="card mb-4">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light"><tr><th>المحافظة</th><th>عدد الوحدات الصحية</th><th>أسر محتاجة لمتابعة</th><th>أسر محتاجة لكل وحدة</th></tr></thead>
+        <tbody>
+        {% for r in rows %}
+          <tr>
+            <td class="fw-bold">{{ r.gov }}</td>
+            <td>{{ r.units if r.units is not none else '—' }}</td>
+            <td>{{ r.need }}</td>
+            <td>{% if r.per_unit is not none %}<span class="badge bg-{{ 'danger' if loop.index <= 3 else 'secondary' }}">{{ r.per_unit }}</span>{% else %}<span class="text-muted">لم تُدخل بعد</span>{% endif %}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% if is_admin %}
+  <div class="card">
+    <div class="card-header">إدخال / تعديل بيانات الوحدات الصحية (للمدير)</div>
+    <div class="card-body">
+      <form method="POST">
+        <div class="row g-2 mb-3">
+          <div class="col-md-8"><label class="form-label">المصدر الرسمي</label><input type="text" name="source" value="{{ source }}" class="form-control" placeholder="مثال: اسم المطبوعة / الجهة"></div>
+          <div class="col-md-4"><label class="form-label">السنة</label><input type="text" name="year" value="{{ year }}" class="form-control"></div>
+        </div>
+        <div class="row g-2">
+          {% for r in rows|sort(attribute='gov') %}
+          <div class="col-6 col-md-3 col-lg-2">
+            <label class="form-label small mb-0">{{ r.gov }}</label>
+            <input type="number" min="0" name="units_{{ r.gov }}" value="{{ r.units if r.units is not none else '' }}" class="form-control form-control-sm">
+          </div>
+          {% endfor %}
+        </div>
+        <button class="btn btn-primary mt-3" type="submit"><i class="bi bi-save me-1"></i>حفظ</button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

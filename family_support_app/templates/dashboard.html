@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}لوحة التحكم{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="stats-card">
+            <div class="stats-number">{{ total_families }}</div>
+            <div class="stats-label">إجمالي الأسر</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stats-card">
+            <div class="stats-number">{{ eligible_count }}</div>
+            <div class="stats-label">مؤهلة للدعم</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stats-card">
+            <div class="stats-number">{{ not_eligible_count }}</div>
+            <div class="stats-label">غير مؤهلة</div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">الإحصائيات حسب المحافظة</h6>
+            </div>
+            <div class="card-body">
+                {% if governorates_stats %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>المحافظة</th>
+                                <th>الإجمالي</th>
+                                <th>المؤهلة</th>
+                                <th>النسبة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for gov, stats in governorates_stats.items() %}
+                            <tr>
+                                <td><span class="badge bg-info">{{ gov }}</span></td>
+                                <td><strong>{{ stats.total }}</strong></td>
+                                <td><span class="badge-eligible">{{ stats.eligible }}</span></td>
+                                <td>
+                                    {% if stats.total > 0 %}
+                                        <span class="badge bg-success">{{ ((stats.eligible / stats.total) * 100) | round(1) }}%</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center">لا توجد بيانات</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">أحدث الأسر المضافة</h6>
+            </div>
+            <div class="card-body">
+                {% if latest_families %}
+                <ul class="list-group list-group-flush">
+                    {% for family in latest_families|reverse %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ family['اسم رب الأسرة'] }}</strong>
+                                <br>
+                                <small class="text-muted">
+                                    {{ family['الرقم القومي'] }} - {{ family['المحافظة'] }}
+                                </small>
+                            </div>
+                            <span class="badge {% if family['مؤهل للدعم'] == 'نعم' %}bg-success{% else %}bg-danger{% endif %}">
+                                {% if family['مؤهل للدعم'] == 'نعم' %}مؤهل{% else %}غير مؤهل{% endif %}
+                            </span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted text-center">لا توجد أسر</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">رسوم بيانية</h6>
+            </div>
+            <div class="card-body text-center">
+                <a href="/charts" class="btn btn-primary btn-lg">
+                    <i class="bi bi-bar-chart-fill me-2"></i>
+                    عرض الرسوم البيانية
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

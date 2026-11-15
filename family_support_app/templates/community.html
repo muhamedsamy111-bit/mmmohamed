@@ -1,0 +1,42 @@
+{% extends layout %}
+{% block title %}مجتمع توأمي{% endblock %}
+{% block content %}
+<div class="community-hero">
+  <div class="container py-5">
+    <span class="badge rounded-pill bg-light text-primary mb-3"><i class="bi bi-people-fill me-1"></i>مساحة آمنة للتواصل</span>
+    <h1 class="fw-bold">مجتمع توأمي</h1>
+    <p class="lead mb-4">اسألي، شاركي خبرتك، وتواصلي مع أسر تمر بتجارب مشابهة في الحمل والتربية ورعاية الأطفال.</p>
+    <a class="btn btn-light btn-lg" href="/community/new"><i class="bi bi-plus-circle me-1"></i>اكتبي موضوعًا جديدًا</a>
+  </div>
+</div>
+<div class="container py-4 community-page">
+  {% if not_found is defined and not_found %}<div class="alert alert-warning">الموضوع غير موجود أو لم يعد متاحًا.</div>{% endif %}
+  <div class="row g-4">
+    <aside class="col-lg-3">
+      <div class="card community-side-card"><div class="card-body">
+        <h2 class="h6 fw-bold"><i class="bi bi-shield-check me-1"></i>إرشادات المجتمع</h2>
+        <ul class="small text-muted ps-3 mb-0"><li>احترمي الجميع واختلاف تجاربهم.</li><li>لا تنشري أرقام الهواتف أو بيانات الأطفال أو التقارير الطبية.</li><li>المشاركات للتجربة والدعم، وليست استشارة طبية.</li><li>للأعراض العاجلة تواصلي مع مختص أو جهة طوارئ.</li></ul>
+      </div></div>
+      {% if is_admin %}<a href="/admin/community" class="btn btn-outline-primary w-100 mt-3"><i class="bi bi-shield-lock me-1"></i>إدارة المجتمع</a>{% endif %}
+    </aside>
+    <section class="col-lg-9">
+      <form method="GET" action="/community" class="community-filter card card-body mb-3">
+        <div class="row g-2"><div class="col-md-5"><input class="form-control" name="q" value="{{ search }}" placeholder="ابحثي في المواضيع"></div><div class="col-md-5"><select class="form-select" name="category"><option value="">كل الأقسام</option>{% for category in categories %}<option value="{{ category }}" {% if selected_category == category %}selected{% endif %}>{{ category }}</option>{% endfor %}</select></div><div class="col-md-2 d-grid"><button class="btn btn-primary" type="submit">بحث</button></div></div>
+      </form>
+      {% for post in posts %}
+      <article class="card community-post mb-3 {% if post.status == 'hidden' %}community-post-hidden{% endif %}">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between flex-wrap gap-2 mb-2"><span class="badge community-category">{{ post.category }}</span><small class="text-muted">{{ post.created_at }}{% if post.status == 'hidden' %} · مخفي للمراجعة{% endif %}</small></div>
+          <h2 class="h5 fw-bold"><a class="community-title-link" href="/community/{{ post.id }}">{{ post.title }}</a></h2>
+          <p class="text-muted community-excerpt">{{ post.body[:300] }}{% if post.body|length > 300 %}…{% endif %}</p>
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2"><div class="small text-muted"><i class="bi bi-person-circle me-1"></i>{{ post.author_name }} <span class="mx-2">·</span><i class="bi bi-chat-dots me-1"></i>{{ post.reply_count }} رد <span class="mx-2">·</span><i class="bi bi-heart me-1"></i>{{ post.like_count }} إعجاب</div><div class="d-flex gap-2">
+            {% if post.status == 'visible' %}<a class="btn btn-sm btn-outline-primary" href="/community/{{ post.id }}">اقرئي وشاركي</a>{% endif %}
+            {% if is_admin %}<form method="POST" action="/admin/community/{{ post.id }}/moderate"><input type="hidden" name="status" value="{% if post.status == 'visible' %}hidden{% else %}visible{% endif %}"><button class="btn btn-sm btn-outline-warning" type="submit">{% if post.status == 'visible' %}إخفاء{% else %}إعادة إظهار{% endif %}</button></form>{% endif %}
+          </div></div>
+        </div>
+      </article>
+      {% else %}<div class="card text-center p-5"><i class="bi bi-chat-heart display-5 text-primary"></i><h2 class="h5 fw-bold mt-3">كوني أول من يبدأ الحديث</h2><p class="text-muted">شاركي سؤالًا أو تجربة قد تساعد أسرة أخرى.</p><a class="btn btn-primary align-self-center" href="/community/new">اكتبي أول موضوع</a></div>{% endfor %}
+    </section>
+  </div>
+</div>
+{% endblock %}

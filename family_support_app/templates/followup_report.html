@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}تقرير المتابعة الشهري{% endblock %}
+
+{% block content %}
+{% set coverage_rate = (families_with_visits / total_families * 100) if total_families > 0 else 0 %}
+{% set support_rate = support_received_percentage %}
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="stats-card bg-primary text-white">
+            <div class="stats-number">{{ total_families }}</div>
+            <div class="stats-label">إجمالي الأسر</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card bg-info text-white">
+            <div class="stats-number">{{ families_with_visits }}</div>
+            <div class="stats-label">أسر تم زيارتها</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card bg-success text-white">
+            <div class="stats-number">{{ total_visits_all }}</div>
+            <div class="stats-label">إجمالي الزيارات</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stats-card">
+            <div class="stats-number">{{ "%.1f"|format(support_rate) }}%</div>
+            <div class="stats-label">نسبة استلام الدعم</div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">العائلات الأكثر زيارة</h6>
+            </div>
+            <div class="card-body">
+                {% if families_visits %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>اسم رب الأسرة</th>
+                                <th>عدد الزيارات</th>
+                                <th>آخر زيارة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in families_visits[:10] %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td><strong>{{ item.family['اسم رب الأسرة'] }}</strong></td>
+                                <td><span class="badge bg-primary">{{ item.visit_count }}</span></td>
+                                <td><small class="text-muted">{{ item.last_visit }}</small></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center">لا توجد زيارات مسجلة</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">أحدث الزيارات</h6>
+            </div>
+            <div class="card-body">
+                {% if latest_visits %}
+                <ul class="list-group list-group-flush">
+                    {% for item in latest_visits %}
+                    <li class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ item.family['اسم رب الأسرة'] }}</strong>
+                                <br>
+                                <small class="text-muted">{{ item.visit.visit_type }}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge {% if item.visit.support_received == 'نعم' %}bg-success{% elif item.visit.support_received == 'لا' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                    {{ item.visit.support_received }}
+                                </span>
+                                <br>
+                                <small class="text-muted">{{ item.visit.visit_date }}</small>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted text-center">لا توجد زيارات</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">تحليل شامل</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>معدل التغطية</h6>
+                        <div class="progress mb-3" style="height: 30px;">
+                            <div class="progress-bar bg-info" role="progressbar" 
+                                 style="width: {{ "%.1f"|format(coverage_rate) }}%" 
+                                 aria-valuenow="{{ "%.1f"|format(coverage_rate) }}" 
+                                 aria-valuemin="0" aria-valuemax="100">
+                                {{ "%.1f"|format(coverage_rate) }}%
+                            </div>
+                        </div>
+                        <p class="text-muted">نسبة الأسر التي تم زيارتها من إجمالي الأسر</p>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6>معدل استلام الدعم</h6>
+                        <div class="progress mb-3" style="height: 30px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {{ "%.1f"|format(support_rate) }}%" 
+                                 aria-valuenow="{{ "%.1f"|format(support_rate) }}" 
+                                 aria-valuemin="0" aria-valuemax="100">
+                                {{ "%.1f"|format(support_rate) }}%
+                            </div>
+                        </div>
+                        <p class="text-muted">نسبة الزيارات التي أكدت استلام الدعم</p>
+                    </div>
+                </div>
+                
+                <hr class="my-4">
+                
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <strong>ملاحظات:</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>يتم تسجيل جميع الزيارات الميدانية والهاتفية</li>
+                        <li>يمكن تتبع حالة كل أسرة بمرور الوقت</li>
+                        <li>التقرير يساعد في تقييم فعالية برنامج الدعم</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3 text-center">
+    <a href="/families" class="btn btn-outline-primary">
+        <i class="bi bi-arrow-left me-2"></i>
+        العودة لقائمة الأسر
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends layout %}
+{% block title %}تقييم ما بعد الولادة{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <a href="{{ url_for('ppd_list') }}" class="small text-decoration-none">← رجوع للقائمة</a>
+  <h4 class="fw-bold mt-2">{{ family['اسم رب الأسرة'] }} <small class="text-muted">— {{ family['المحافظة'] }}</small></h4>
+  <p class="text-muted">تاريخ آخر ولادة: {{ family['تاريخ آخر ولادة'] }} ({{ days }} يوم) — عدد الأطفال: {{ family['عدد الأطفال'] }}</p>
+
+  {% if risk == 'عاجل' %}
+  <div class="alert alert-danger"><strong>مؤشر على إيذاء النفس مسجّل.</strong> هذا يستدعي تقييمًا مباشرًا وعاجلًا وفق بروتوكول جهتك للحالات الحرجة. النظام لا يتواصل مع أحد تلقائيًا.</div>
+  {% elif risk == 'يحتاج تقييم' %}
+  <div class="alert alert-warning">آخر مسح فوق الحد المحدد — الأمر يستدعي تقييمًا نفسيًا من الأخصائي.</div>
+  {% endif %}
+
+  <div class="card mb-4">
+    <div class="card-header">تسجيل مسح / متابعة جديدة</div>
+    <div class="card-body">
+      <p class="small text-muted">أدخل درجة المقياس المعتمد (مثل مقياس إدنبرة EPDS من 0 إلى 30) بعد ما تجريه مع الأم. النظام لا يجري المقياس ولا يشخّص، هو يسجّل ويرتّب الأولويات فقط.</p>
+      <form method="POST" class="row g-3">
+        <div class="col-md-3"><label class="form-label">تاريخ المسح</label><input type="date" name="screening_date" value="{{ today }}" class="form-control"></div>
+        <div class="col-md-3"><label class="form-label">الدرجة (0–30)</label><input type="number" min="0" max="30" name="epds" class="form-control"></div>
+        <div class="col-md-3"><label class="form-label">مؤشر على إيذاء النفس؟</label>
+          <select name="self_harm" class="form-select"><option value="لا">لا</option><option value="نعم">نعم (يستدعي تقييمًا عاجلًا)</option></select></div>
+        <div class="col-md-3"><label class="form-label">حالة المتابعة</label>
+          <select name="follow_up" class="form-select"><option>لم يبدأ</option><option>تم التواصل</option><option>تمت الإحالة</option><option>متابعة جارية</option><option>مغلقة</option></select></div>
+        <div class="col-12"><label class="form-label">ملاحظات الأخصائي النفسي</label><textarea name="notes" rows="3" maxlength="1000" class="form-control"></textarea></div>
+        <div class="col-12"><button class="btn btn-primary" type="submit"><i class="bi bi-save me-1"></i>حفظ</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">السجل السابق</div>
+    <div class="table-responsive">
+      <table class="table table-sm mb-0">
+        <thead class="table-light"><tr><th>التاريخ</th><th>الدرجة</th><th>إيذاء النفس</th><th>المتابعة</th><th>ملاحظات</th><th>بواسطة</th></tr></thead>
+        <tbody>
+        {% for r in records %}
+          <tr><td>{{ r.date }}</td><td>{{ r.epds if r.epds != '' else '—' }}</td><td>{{ r.self_harm }}</td><td>{{ r.follow_up }}</td><td>{{ r.notes }}</td><td>{{ r.by }}</td></tr>
+        {% else %}
+          <tr><td colspan="6" class="text-center text-muted py-3">لا توجد سجلات بعد.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

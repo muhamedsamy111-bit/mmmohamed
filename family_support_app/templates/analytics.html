@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}لوحة الإحصائيات{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="text-center mb-4">
+    <h2 class="fw-bold text-dark"><i class="bi bi-bar-chart-line me-2"></i>لوحة الإحصائيات التفاعلية</h2>
+    <p class="text-muted">تحليل شامل لبيانات الأسر المسجلة</p>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="row g-3 mb-4" id="kpiRow">
+    <div class="col-6 col-md-3"><div class="card text-center p-3"><div class="fs-1 fw-bold text-primary" id="kpiTotal">-</div><div class="text-muted small">إجمالي الأسر</div></div></div>
+    <div class="col-6 col-md-3"><div class="card text-center p-3"><div class="fs-1 fw-bold text-success" id="kpiEligible">-</div><div class="text-muted small">مؤهلة للدعم</div></div></div>
+    <div class="col-6 col-md-3"><div class="card text-center p-3"><div class="fs-1 fw-bold text-warning" id="kpiDisabled">-</div><div class="text-muted small">بمعيل معاق</div></div></div>
+    <div class="col-6 col-md-3"><div class="card text-center p-3"><div class="fs-1 fw-bold text-danger" id="kpiOrphans">-</div><div class="text-muted small">بأيتام</div></div></div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Priority Doughnut -->
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-header"><i class="bi bi-pie-chart me-2"></i>توزيع الأولوية</div>
+        <div class="card-body d-flex align-items-center justify-content-center">
+          <canvas id="priorityChart" height="220"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Governorate Bar -->
+    <div class="col-md-8">
+      <div class="card h-100">
+        <div class="card-header"><i class="bi bi-map me-2"></i>توزيع الأسر حسب المحافظة</div>
+        <div class="card-body">
+          <canvas id="govChart" height="220"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Income Bar -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header"><i class="bi bi-cash me-2"></i>توزيع الدخل الشهري</div>
+        <div class="card-body">
+          <canvas id="incomeChart" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Children Bar -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header"><i class="bi bi-people me-2"></i>توزيع عدد الأطفال</div>
+        <div class="card-body">
+          <canvas id="childrenChart" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Download PDF Button -->
+  <div class="text-center mt-4">
+    <a href="/report/pdf" class="btn btn-danger btn-lg rounded-pill">
+      <i class="bi bi-file-earmark-pdf me-2"></i>تحميل التقرير الشامل PDF
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+Chart.defaults.font.family = 'Cairo, sans-serif';
+Chart.defaults.color = '#666';
+
+fetch('/dashboard/stats')
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('kpiTotal').textContent    = data.total;
+    document.getElementById('kpiEligible').textContent = data.eligible;
+    document.getElementById('kpiDisabled').textContent = data.disabled;
+    document.getElementById('kpiOrphans').textContent  = data.orphans;
+
+    // Priority Doughnut
+    const pd = data.priority_distribution;
+    new Chart(document.getElementById('priorityChart'), {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(pd),
+        datasets: [{ data: Object.values(pd), backgroundColor: ['#e63946','#f4a261','#2a9d8f'], borderWidth: 0 }]
+      },
+      options: { plugins: { legend: { position: 'bottom' } }, cutout: '60%' }
+    });
+
+    // Governorate Bar
+    const gov = data.governorates;
+    const govSorted = Object.entries(gov).sort((a,b) => b[1]-a[1]).slice(0,10);
+    new Chart(document.getElementById('govChart'), {
+      type: 'bar',
+      data: {
+        labels: govSorted.map(e => e[0]),
+        datasets: [{ label: 'عدد الأسر', data: govSorted.map(e => e[1]),
+          backgroundColor: '#4361ee', borderRadius: 6 }]
+      },
+      options: { indexAxis: 'y', plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+    });
+
+    // Income
+    const inc = data.income_distribution;
+    new Chart(document.getElementById('incomeChart'), {
+      type: 'bar',
+      data: {
+        labels: Object.keys(inc),
+        datasets: [{ label: 'عدد الأسر', data: Object.values(inc),
+          backgroundColor: ['#e63946','#f4a261','#2a9d8f','#4361ee'], borderRadius: 6 }]
+      },
+      options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+
+    // Children
+    const ch = data.children_distribution;
+    const chSorted = Object.entries(ch).sort((a,b) => parseInt(a[0])-parseInt(b[0]));
+    new Chart(document.getElementById('childrenChart'), {
+      type: 'bar',
+      data: {
+        labels: chSorted.map(e => e[0] + ' أطفال'),
+        datasets: [{ label: 'عدد الأسر', data: chSorted.map(e => e[1]),
+          backgroundColor: '#7209b7', borderRadius: 6 }]
+      },
+      options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوابة دعم الأسر</title>
+    <link rel="icon" type="image/jpeg" href="/static/brand-logo.jpeg?v=3">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/modern.css">
+
+    <style>
+        :root {
+            --gov-blue: #285b78;
+            --gov-blue-light: #6e9db5;
+            --gov-gold: #d7a15b;
+            --gov-coral: #e99a89;
+        }
+        * { font-family: 'Almarai', sans-serif; }
+        body { margin: 0; background: #f7f6f2; color: #263b48; }
+
+        .gov-header {
+            background: var(--gov-blue);
+            color: #fff;
+            padding: 10px 0;
+            font-size: 13px;
+            border-bottom: 3px solid var(--gov-coral);
+        }
+        .gov-navbar {
+            background: #fff;
+            padding: 14px 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+        .gov-navbar .brand {
+            font-weight: 800;
+            font-size: 18px;
+            color: var(--gov-blue);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+        .brand-logo {
+            width: 52px;
+            height: 52px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid #dce8eb;
+            background: #fff;
+        }
+        .gov-hero {
+            background: linear-gradient(135deg, #285b78 0%, #477d96 65%, #6e9db5 100%);
+            color: #fff;
+            padding: 60px 0;
+            text-align: center;
+        }
+        .gov-hero h1 { font-weight: 800; font-size: 34px; }
+        .gov-hero p { font-size: 17px; opacity: 0.9; }
+        .gov-hero .hero-note { max-width: 700px; margin: 0 auto; }
+        .gov-hero .btn-brand { background: var(--gov-coral); color: #263b48; font-weight: 800; border: 0; }
+        .gov-hero .btn-brand:hover { background: #f1b0a1; color: #263b48; }
+
+        .feature-box {
+            background: #fff;
+            border-radius: 12px;
+            padding: 28px 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            height: 100%;
+        }
+        .feature-box i { font-size: 34px; color: var(--gov-blue); }
+        .feature-box h6 { font-weight: 800; color: var(--gov-blue); margin-top: 12px; }
+        .feature-box p { font-size: 13px; color: #666; margin-bottom: 0; }
+
+        .announcement-card {
+            border-right: 5px solid var(--gov-coral);
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .announcement-card .date { color: #888; font-size: 12px; }
+        .announcement-card h6 { color: var(--gov-blue); font-weight: 800; margin-bottom: 4px; font-size: 14px; }
+        .announcement-card p { font-size: 13px; }
+
+        .section-title {
+            font-weight: 800;
+            color: var(--gov-blue);
+            border-bottom: 3px solid var(--gov-gold);
+            display: inline-block;
+            padding-bottom: 6px;
+            margin-bottom: 20px;
+        }
+        footer {
+            background: var(--gov-blue);
+            color: #cfe0f0;
+            text-align: center;
+            padding: 18px 0;
+            margin-top: 40px;
+            font-size: 13px;
+        }
+        @media (max-width: 575.98px) {
+            .gov-header .container { gap: 6px; flex-direction: column; text-align: center; }
+            .gov-navbar .brand { font-size: 15px; gap: 8px; }
+            .brand-logo { width: 44px; height: 44px; }
+            .gov-navbar .container { gap: 10px; }
+            .gov-hero { padding: 48px 0; }
+            .gov-hero h1 { font-size: 27px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="gov-header">
+        <div class="container d-flex justify-content-between">
+            <span><i class="bi bi-flag me-1"></i> جمهورية مصر العربية</span>
+            <span>وزارة الصحة والسكان — بوابة الخدمات المجتمعية</span>
+        </div>
+    </div>
+
+    <nav class="gov-navbar">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a class="brand" href="/">
+                <img class="brand-logo" src="/static/brand-logo.jpeg?v=3" alt="شعار توأمي لدعم الأم والتوائم">
+                <span>توأمي <small class="d-block fw-normal">دعم الأم والتوائم</small></span>
+            </a>
+            <div>
+                <a href="/signup" class="me-3 text-decoration-none small" style="color:var(--gov-blue)">إنشاء حساب</a>
+                <a href="/login" class="btn btn-sm" style="background:var(--gov-blue);color:#fff">تسجيل الدخول</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="tw-hero">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <span class="badge mb-3" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);font-size:14px;">🤱 توأمي — دعم الأم والتوائم</span>
+                    <h1>رعاية أقرب لكِ ولتوأمك</h1>
+                    <p class="lead">نساندك في رحلة الحمل والأمومة: تسجيل الأسر، متابعة الحوامل، شهادات الميلاد والتوائم، التحاليل، وقوافل طبية — كل ده من مكان واحد.</p>
+                    <div class="mt-4 d-flex gap-2 flex-wrap">
+                        <a href="/signup" class="btn btn-lg btn-brand">
+                            <i class="bi bi-person-plus me-2"></i>سجّل بيانات أسرتك الآن
+                        </a>
+                        <a href="/login" class="btn btn-lg btn-outline-light">
+                            <i class="bi bi-box-arrow-in-left me-2"></i>عندك حساب؟ سجّل دخولك
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-5 mt-4 mt-lg-0">
+                    <div class="glass-card p-4">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-graph-up-arrow me-2"></i>البوابة بالأرقام</h6>
+                        <div class="row g-2 text-center">
+                            <div class="col-6"><div class="stat-chip"><div class="num">{{ stats.families }}</div><div class="lbl">أسرة مسجلة</div></div></div>
+                            <div class="col-6"><div class="stat-chip"><div class="num">{{ stats.governorates }}</div><div class="lbl">محافظة</div></div></div>
+                            <div class="col-6"><div class="stat-chip"><div class="num">{{ stats.pregnant }}</div><div class="lbl">حامل تحت المتابعة</div></div></div>
+                            <div class="col-6"><div class="stat-chip"><div class="num">{{ stats.twins }}</div><div class="lbl">مجموعة توائم</div></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container my-5">
+        <h5 class="section-title"><i class="bi bi-grid-1x2-gap me-2"></i>خدماتنا للأم والطفل</h5>
+        <div class="row g-3 mb-5">
+            <div class="col-md-3 col-sm-6">
+                <div class="img-card">
+                    <img src="/static/img/card-vaccine.jpg?v=2" alt="تطعيمات الأطفال" loading="lazy">
+                    <div class="img-card-body">
+                        <h6><i class="bi bi-shield-plus me-1"></i>تطعيمات الأطفال</h6>
+                        <p class="text-muted small mb-0">متابعة تطعيمات تحت 5 سنين وتنبيه الجرعات المتأخرة.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="img-card">
+                    <img src="/static/img/card-labs.jpg?v=2" alt="تحاليل الفيتامينات والمعادن" loading="lazy">
+                    <div class="img-card-body">
+                        <h6><i class="bi bi-droplet-half me-1"></i>تحاليل الأم والطفل</h6>
+                        <p class="text-muted small mb-0">ارفعي صور التحاليل (فيتامينات ومعادن) وتابعي المراجعة.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="img-card">
+                    <img src="/static/img/card-support.jpg?v=2" alt="دعم الأسر" loading="lazy">
+                    <div class="img-card-body">
+                        <h6><i class="bi bi-hands-helping me-1"></i>دعم الأسر</h6>
+                        <p class="text-muted small mb-0">أولوية عادلة للدعم حسب الدخل والأطفال والحالة الصحية.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="img-card">
+                    <img src="/static/img/card-family.jpg?v=2" alt="شهادات الميلاد والتوائم" loading="lazy">
+                    <div class="img-card-body">
+                        <h6><i class="bi bi-people me-1"></i>المواليد والتوائم</h6>
+                        <p class="text-muted small mb-0">تسجيل المواليد وشهادات الميلاد وربط التوائم تلقائيًا.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h5 class="section-title"><i class="bi bi-info-circle me-2"></i>إزاي تستفيد من الخدمة؟</h5>
+        <div class="row g-3 mb-5">
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <i class="bi bi-person-plus"></i>
+                    <h6>1. اعمل حساب</h6>
+                    <p>افتح حساب بسيط باسمك واسم مستخدم وكلمة مرور، ياخد دقيقة واحدة.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <i class="bi bi-clipboard-check"></i>
+                    <h6>2. سجّل بيانات أسرتك</h6>
+                    <p>املا بيانات بسيطة عن أسرتك، وهيتم مراجعتها وتحديد الأولوية تلقائيًا.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-box">
+                    <i class="bi bi-graph-up-arrow"></i>
+                    <h6>3. تابع حالة طلبك</h6>
+                    <p>ادخل حسابك في أي وقت وتابع حالة طلب الدعم بتاعك أول بأول.</p>
+                </div>
+            </div>
+        </div>
+
+        {% if health_news %}
+        <h5 class="section-title"><i class="bi bi-megaphone me-2"></i>آخر إعلانات وزارة الصحة والسكان</h5>
+        <div class="row g-3">
+            {% for n in health_news %}
+            <div class="col-md-4">
+                <a href="{{ n.link }}" target="_blank" rel="noopener" class="text-decoration-none text-dark">
+                    <div class="announcement-card h-100">
+                        <div class="date"><i class="bi bi-calendar3 me-1"></i>{{ n.date }}</div>
+                        <h6>{{ n.title }}</h6>
+                        <p class="text-muted mb-0">{{ n.desc[:120] }}{% if n.desc|length > 120 %}...{% endif %}</p>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <footer>
+        © وزارة الصحة والسكان — بوابة دعم الأسر المجتمعية
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
